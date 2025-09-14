@@ -10,6 +10,7 @@ export default function Profile() {
   const isTeacher = user.role === 'teacher';
   const isAdmin = user.role === 'admin';
   const [name, setName] = useState(user.name || '');
+  const [phone, setPhone] = useState(user.phone || '');
   useEffect(() => { api.get('/profiles/me').then(r => { setData(r.profile); setForm(r.profile || {}); }); }, []);
   function onChange(e) { setForm({ ...form, [e.target.name]: e.target.value }); }
   function save() {
@@ -21,9 +22,9 @@ export default function Profile() {
       if (!Number.isFinite(n)) payload.experience_years = 0; else payload.experience_years = n;
     }
     // First update base account name if changed
-    const namePromise = name !== user.name ? api.put('/auth/me', { name }) : Promise.resolve({ user });
+  const namePromise = (name !== user.name || phone !== (user.phone||'')) ? api.put('/auth/me', { name, phone }) : Promise.resolve({ user });
     namePromise
-      .then(resp => { if (resp.user) setUser(prev => ({ ...prev, name: resp.user.name })); return api[method](path, payload); })
+  .then(resp => { if (resp.user) setUser(prev => ({ ...prev, name: resp.user.name, phone: resp.user.phone })); return api[method](path, payload); })
       .then(r => { setData(r.profile); showToast('Profile saved','success'); })
       .catch(e => { showToast(e.message || 'Save failed','error'); });
   }
@@ -60,9 +61,18 @@ export default function Profile() {
           <p className="muted" style={{ marginTop: 0, marginBottom: '1.4rem' }}>{isTeacher ? 'Showcase expertise & teaching focus.' : 'Describe your institution & open roles focus.'}</p>
         </>
       )}
-      <div style={{ marginBottom:'1rem', maxWidth:420 }}>
-        <label style={{ fontSize: '.65rem' }}>Full Name</label>
-        <input name="name" value={name} onChange={e=>setName(e.target.value)} placeholder="Your full name" />
+      <div style={{ display:'grid', gap:'1rem', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', maxWidth:420, marginBottom:'1rem' }}>
+        <div>
+          <label style={{ fontSize: '.65rem' }}>Full Name</label>
+          <input name="name" value={name} onChange={e=>setName(e.target.value)} placeholder="Your full name" />
+        </div>
+        <div>
+          <label style={{ fontSize: '.65rem' }}>Phone</label>
+          <input name="phone" value={phone} onChange={e=>{ const v=e.target.value.replace(/[^\d]/g,'').slice(0,10); setPhone(v); }} placeholder="9876543210" />
+          {phone && !/^\d{10}$/.test(phone) && (
+            <div style={{ color:'var(--color-danger)', fontSize:'.55rem', marginTop:'.25rem', fontWeight:600, letterSpacing:'.5px' }}>Invalid phone</div>
+          )}
+        </div>
       </div>
       {isTeacher ? (
         <div className="grid" style={{ gap: '1rem' }}>

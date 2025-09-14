@@ -3,6 +3,8 @@ import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 import About from './pages/About.jsx';
 import DashboardTeacher from './pages/DashboardTeacher.jsx';
 import DashboardEmployer from './pages/DashboardEmployer.jsx';
@@ -140,12 +142,16 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
+            <Route path="/reset" element={<ResetPassword />} />
           </Routes>
         )}
         {!background && (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
+            <Route path="/reset" element={<ResetPassword />} />
           </Routes>
         )}
       </div>

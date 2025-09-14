@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../state/AuthContext.jsx';
 import AuthModal from '../components/AuthModal.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function Login() {
   const { login } = useAuth();
@@ -47,11 +48,21 @@ export default function Login() {
           <input autoFocus name="email" type="email" placeholder="you@example.com" value={form.email} onChange={onChange} required />
         </div>
         <div>
-          <label>Password</label>
-          <input name="password" type="password" placeholder="••••••••" value={form.password} onChange={onChange} required />
+          <label htmlFor="login-password">Password</label>
+          <PasswordInput
+            id="login-password"
+            value={form.password}
+            onChange={onChange}
+            required
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
         </div>
         <button className="btn" disabled={loading}>{loading ? 'Signing In…' : 'Sign In'}</button>
-        <div className="auth-alt">New here? <Link to="/signup" state={{ background: { pathname: '/' } }}>Create an account</Link></div>
+        <div className="auth-alt" style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:'.5rem' }}>
+          <span>New here? <Link to="/signup" state={{ background: { pathname: '/' } }}>Create an account</Link></span>
+          <span><Link to="/forgot" state={{ background: { pathname: '/' } }}>Forgot password?</Link></span>
+        </div>
       </form>
     </AuthModal>
   );

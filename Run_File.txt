@@ -22,15 +22,24 @@ admin123
 
 Login Teacher
 
-employee1@example.com   
+employee1@gmail.com  
+employee2@gmail.com 
 password123
-
+rithikashetty@gmail.com
+Rithika123
 
 Login Employer/University
 
-school1@example.com
+school1@gmail.com
+password123
+school2@gmail.com
 password123
 
 
 
 
+database storage (sqlite)
+
+open database
+goto: Documents\Job_Portal\server\data
+and select

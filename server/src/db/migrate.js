@@ -33,6 +33,21 @@ const migrations = [
       if (!names.includes('resume_mime')) db.prepare('ALTER TABLE teacher_profiles ADD COLUMN resume_mime TEXT').run();
       if (!names.includes('resume_data')) db.prepare('ALTER TABLE teacher_profiles ADD COLUMN resume_data BLOB').run();
     }
+  },
+  {
+    id: '20250914_add_user_phone_column',
+    up: () => {
+      const userCols = db.prepare('PRAGMA table_info(users)').all().map(c => c.name);
+      if (!userCols.includes('phone')) db.prepare('ALTER TABLE users ADD COLUMN phone TEXT').run();
+    }
+  },
+  {
+    id: '20250914_add_user_reset_columns',
+    up: () => {
+      const userCols = db.prepare('PRAGMA table_info(users)').all().map(c => c.name);
+      if (!userCols.includes('reset_token')) db.prepare('ALTER TABLE users ADD COLUMN reset_token TEXT').run();
+      if (!userCols.includes('reset_expires')) db.prepare('ALTER TABLE users ADD COLUMN reset_expires INTEGER').run();
+    }
   }
 ];
 
