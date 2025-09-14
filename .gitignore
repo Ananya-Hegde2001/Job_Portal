@@ -1,0 +1,73 @@
+#############################################
+# Essential Ignores (safe for open source)  #
+#############################################
+
+# Dependencies (never commit installed modules)
+node_modules/
+**/node_modules/
+
+# Build outputs (re-created via build scripts)
+client/dist/
+client/.vite/
+server/dist/
+
+# Caches / tooling noise
+.vite/
+.cache/
+.eslintcache
+coverage/
+*.lcov
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment secrets (provide a .env.example instead)
+.env
+.env.*
+!server/.env.example
+
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# Temporary directories
+tmp/
+.tmp/
+.temp/
+.parcel-cache/
+.vercel/
+.next/
+
+# Reports / artifacts
+report-*.json
+
+# Optional: comment out if you WANT to ignore lock files (recommended to KEEP them for reproducible installs)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Optional future uploaded assets / binaries (uncomment if added later)
+# public/build/
+# uploads/
+
+# If you move resumes out of DB to filesystem, ignore that folder:
+# resumes/
+
+# Local script outputs (adjust if you add such directory)
+scripts/output/
+
+# Rationale:
+# - Keep lockfiles committed for deterministic dependency resolution.
+# - Ignore environment & database to prevent leaking secrets or user data.
+# - Ignore build + cache outputs to avoid stale artifacts causing confusion.

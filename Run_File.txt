@@ -1,0 +1,36 @@
+# In one PowerShell window
+cd server
+copy .env.example .env
+npm install
+cd server
+npm run init:db
+npm run seed:jobs
+npm run dev
+
+# In another window
+cd client
+npm install
+cd client
+npm run dev
+
+All login Credentials with passwords
+
+Login admin
+
+admin@portal.local
+admin123
+
+Login Teacher
+
+employee1@example.com   
+password123
+
+
+Login Employer/University
+
+school1@example.com
+password123
+
+
+
+
