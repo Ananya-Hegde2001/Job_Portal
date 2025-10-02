@@ -1,12 +1,18 @@
 import React from 'react';
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Home from './pages/Home.jsx';
+import AIChat from './pages/AIChat.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import About from './pages/About.jsx';
 import DashboardTeacher from './pages/DashboardTeacher.jsx';
+import HelpCenter from './pages/HelpCenter.jsx';
+import Institutions from './pages/Institutions.jsx';
+import SalaryGuide from './pages/SalaryGuide.jsx';
+import SalaryDetail from './pages/SalaryDetail.jsx';
 import DashboardEmployer from './pages/DashboardEmployer.jsx';
 import Admin from './pages/Admin.jsx';
 import JobList from './pages/JobList.jsx';
@@ -14,13 +20,61 @@ import JobDetail from './pages/JobDetail.jsx';
 import PostJob from './pages/PostJob.jsx';
 import Profile from './pages/Profile.jsx';
 import { useAuth } from './state/AuthContext.jsx';
+import LanguageSelect from './components/LanguageSelect.jsx';
+import FloatingFeedback from './components/FloatingFeedback.jsx';
 
 function Nav() {
   const { user, logout } = useAuth();
   const [open, setOpen] = React.useState(false);
+  const menuRef = React.useRef(null); // wrapper for button + dropdown
+  const [theme, setTheme] = React.useState(()=>{
+    if (typeof window === 'undefined') return 'dark';
+    return localStorage.getItem('jp-theme') || 'dark';
+  });
+  React.useEffect(()=>{
+    // apply theme attribute
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('jp-theme', theme);
+    // if we are in a switching state, remove the no-transition flag next frame
+    if (document.documentElement.classList.contains('theme-switching')) {
+      requestAnimationFrame(()=>{
+        document.documentElement.classList.remove('theme-switching');
+      });
+    }
+  },[theme]);
+  const toggleTheme = () => {
+    const doc = document.documentElement;
+    // add class to suppress transitions only for the switch
+    doc.classList.add('theme-switching');
+    setTheme(t=> t === 'dark' ? 'light' : 'dark');
+  };
   const location = useLocation();
+  const { t } = useTranslation();
   function toggleMenu() { setOpen(o=>!o); }
   const active = (path) => location.pathname === path ? 'active' : undefined;
+  const isLight = theme === 'light';
+
+  // Close menu on route change
+  React.useEffect(()=>{ setOpen(false); }, [location.pathname]);
+
+  // Close on outside click / touch or Escape
+  React.useEffect(()=>{
+    if(!open) return; // only attach when open
+    function handlePointer(e){
+      if(menuRef.current && !menuRef.current.contains(e.target)){
+        setOpen(false);
+      }
+    }
+    function handleKey(e){ if(e.key === 'Escape') setOpen(false); }
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('touchstart', handlePointer, { passive:true });
+    document.addEventListener('keydown', handleKey);
+    return ()=>{
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('touchstart', handlePointer);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [open]);
   return (
     <div className="navbar">
       <div className="navbar-inner">
@@ -30,24 +84,54 @@ function Nav() {
         <path fill="white" d="M30 78V42l30-12 30 12v36l-30 12-30-12Zm30-24 26.4-10.56L60 33 33.6 43.44 60 54Zm0 5.52L36 50.16v23.28L60 83l24-9.56V50.16L60 59.52Z" />
       </svg>
     </span>
-    Teacher's JobPortal
+    {t('brand')}
   </Link>
         <div className="nav-links">
-          <Link className={active('/')} to="/">Home</Link>
-          {(!user || user.role !== 'employer') && <Link className={active('/jobs')} to="/jobs">Find Jobs</Link>}
-          <Link className={active('/about')} to="/about">About</Link>
-          {user?.role === 'teacher' && <Link to="/dashboard/teacher">Dashboard</Link>}
-          {user?.role === 'employer' && <Link to="/dashboard/employer">Employer</Link>}
-          {user?.role === 'admin' && <Link to="/admin">Admin</Link>}
+          <Link className={active('/')} to="/">{t('nav.home')}</Link>
+          {(!user || user.role !== 'employer') && <Link className={active('/jobs')} to="/jobs">{t('nav.findJobs')}</Link>}
+          <Link className={active('/institutions')} to="/institutions">{t('nav.institutions')}</Link>
+          <Link className={active('/salary')} to="/salary">{t('nav.salary')}</Link>
+          <Link className={active('/help')} to="/help">{t('nav.help')}</Link>
+          <Link className={active('/about')} to="/about">{t('nav.about')}</Link>
+          <Link
+            className={active('/ai-chat')}
+            to="/ai-chat"
+            title={user ? 'Open AI Chat Assistant' : 'Login required'}
+            style={!user ? { position:'relative' } : undefined}
+          >
+            {t('nav.aiChat')}
+            {!user && <span style={{marginLeft:4,fontSize:'10px',opacity:.6}}>🔒</span>}
+          </Link>
+          {user?.role === 'teacher' && <Link to="/dashboard/teacher">{t('nav.teacherDash')}</Link>}
+          {user?.role === 'employer' && <Link to="/dashboard/employer">{t('nav.employerDash')}</Link>}
+          {user?.role === 'admin' && <Link to="/admin">{t('nav.admin')}</Link>}
         </div>
         <div className="nav-spacer" />
-        <div className="nav-links" style={{ gap: '1rem' }}>
+        <div className="nav-links" style={{ gap: '1rem', alignItems:'center' }}>
+          <button
+            aria-label={isLight ? 'Switch to dark theme' : 'Switch to light theme'}
+            className="theme-toggle"
+            data-mode={theme}
+            onClick={toggleTheme}
+            style={{ order: 10 }}
+            title={isLight ? 'Dark mode' : 'Light mode'}
+          >
+            <span className="icon-wrap" aria-hidden>
+              <svg className="icon-sun" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5" />
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <svg className="icon-moon" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 0 1 11.21 3 7 7 0 1 0 21 12.79Z" />
+              </svg>
+            </span>
+            <span className="visually-hidden">{isLight ? 'Switch to dark theme' : 'Switch to light theme'}</span>
+          </button>
           {user ? (
             <>
-              {user.role === 'employer' && <Link className="btn btn-sm" to="/post-job">Post Job</Link>}
-              {user.role === 'teacher' && <Link className="btn-outline btn-sm" to="/jobs">Search Jobs</Link>}
-              <div style={{ position:'relative' }}>
-                <button onClick={toggleMenu} style={{
+              <LanguageSelect />
+              <div style={{ position:'relative' }} ref={menuRef}>
+                <button onClick={toggleMenu} aria-haspopup="menu" aria-expanded={open} style={{
                   background:'var(--color-surface-alt)',
                   border:'1px solid var(--color-border)',
                   display:'flex',alignItems:'center',gap:'.55rem',
@@ -72,11 +156,11 @@ function Nav() {
                   }}>
                     {user.role==='admin' ? 'A' : user.role==='employer' ? 'E' : 'T'}
                   </span>
-                  <span style={{ maxWidth:120,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:'#e2e8f0' }}>{user.name || 'Account'}</span>
+                  <span className="acct-name" style={{ maxWidth:120,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{user.name || 'Account'}</span>
                   <span style={{fontSize:10,opacity:.6,display:'flex',alignItems:'center',marginLeft:2}}>{open ? '▴' : '▾'}</span>
                 </button>
                 {open && (
-                  <div style={{ position:'absolute', right:0, top:'110%', background:'linear-gradient(160deg,#1b2530,#141b23)', border:'1px solid var(--color-border)', borderRadius:'18px', padding:'.9rem 1rem 1rem', minWidth:250, boxShadow:'0 12px 40px -10px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.05)', display:'grid', gap:'.7rem', zIndex:80 }}>
+                  <div style={{ position:'absolute', right:0, top:'110%', background:'var(--color-elevated-bg,linear-gradient(160deg,#1b2530,#141b23))', border:'1px solid var(--color-border)', borderRadius:'18px', padding:'.9rem 1rem 1rem', minWidth:250, boxShadow:'0 12px 40px -10px rgba(0,0,0,.25),0 0 0 1px rgba(0,0,0,.04)', display:'grid', gap:'.7rem', zIndex:80 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'.7rem' }}>
                       <div style={{
                         width:42,height:42,borderRadius:'14px',
@@ -94,16 +178,29 @@ function Nav() {
                     </div>
                     <div style={{ height:1,background:'linear-gradient(90deg,transparent,var(--color-border),transparent)',margin:'.25rem 0 .2rem' }} />
                     <Link to="/profile" onClick={()=>setOpen(false)} className="btn-outline btn-sm" style={{ textAlign:'center' }}>Profile</Link>
-                    <button className="btn-outline btn-sm" onClick={()=>{ setOpen(false); logout(); }}>Logout</button>
+                    <button
+                      className="btn btn-sm"
+                      onClick={()=>{ setOpen(false); logout(); }}
+                      style={{
+                        background:'#3b82f6',
+                        borderColor:'#3b82f6',
+                        color:'#fff',
+                        '--btn-bg':'#3b82f6',
+                        '--btn-bg-hover':'#2563eb',
+                        textAlign:'center',
+                        width:'100%',
+                        justifyContent:'center'
+                      }}
+                    >Logout</button>
                   </div>
                 )}
               </div>
             </>
           ) : (
             <div style={{ display:'flex', alignItems:'center', gap:'.75rem', paddingRight:'.25rem' }}>
-              <Link to="/login" className="btn-outline btn-sm">Sign In</Link>
-              <Link to="/signup" className="btn btn-sm">Register</Link>
-              <Link to="/post-job" className="btn-outline btn-sm">Post Job</Link>
+              <Link to="/login" className="btn-outline btn-sm">{t('nav.signIn')}</Link>
+              <Link to="/signup" className="btn btn-sm">{t('nav.register')}</Link>
+              <LanguageSelect />
             </div>
           )}
         </div>
@@ -113,8 +210,10 @@ function Nav() {
 }
 
 function Protected({ roles, children }) {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  const { user, initializing } = useAuth();
+  const location = useLocation();
+  if (initializing) return null; // or a small loader component
+  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
   return children;
 }
@@ -130,6 +229,10 @@ export default function App() {
         <Routes location={background || location}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/institutions" element={<Institutions />} />
+          <Route path="/salary" element={<SalaryGuide />} />
+          <Route path="/salary/:slug" element={<SalaryDetail />} />
+          <Route path="/help" element={<HelpCenter />} />
           <Route path="/jobs" element={<JobList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/post-job" element={<Protected roles={['employer']}><PostJob /></Protected>} />
@@ -137,6 +240,7 @@ export default function App() {
           <Route path="/dashboard/teacher" element={<Protected roles={['teacher']}><DashboardTeacher /></Protected>} />
           <Route path="/dashboard/employer" element={<Protected roles={['employer']}><DashboardEmployer /></Protected>} />
           <Route path="/admin" element={<Protected roles={['admin']}><Admin /></Protected>} />
+          <Route path="/ai-chat" element={<Protected roles={['teacher','employer','admin']}><div style={{padding:'1.5rem 1.2rem'}}><AIChat /></div></Protected>} />
         </Routes>
         {background && (
           <Routes>
@@ -155,6 +259,7 @@ export default function App() {
           </Routes>
         )}
       </div>
+      <FloatingFeedback />
     </div>
   );
 }

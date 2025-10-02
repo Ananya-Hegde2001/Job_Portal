@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-  "init:db": "node src/db/init.js && node src/db/migrate.js",
-  "normalize:emails": "node scripts/normalize_emails.js",
-  "seed:jobs": "node scripts/seed_jobs.js"
+    "init:db": "node src/db/init.js && node src/db/migrate.js",
+    "normalize:emails": "node scripts/normalize_emails.js",
+    "seed:jobs": "node scripts/seed_jobs.js"
   },
   "dependencies": {
+    "@google/genai": "^1.21.0",
+    "@google/generative-ai": "^0.9.0",
+    "bcryptjs": "^2.4.3",
     "better-sqlite3": "^9.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -18,7 +21,6 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "bcryptjs": "^2.4.3",
     "multer": "^1.4.5-lts.1"
   }
 }

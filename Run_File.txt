@@ -5,13 +5,13 @@ npm install
 cd server
 npm run init:db
 npm run seed:jobs
+cd server; npm run init:db; npm run seed:jobs; npm run dev
 npm run dev
 
 # In another window
 cd client
 npm install
-cd client
-npm run dev
+cd client; npm run dev
 
 All login Credentials with passwords
 
@@ -43,3 +43,12 @@ database storage (sqlite)
 open database
 goto: Documents\Job_Portal\server\data
 and select
+
+
+Run the Project(Two Steps)
+
+cd server; npm run init:db; npm run seed:jobs; npm run dev
+
+open another terminal
+
+cd client; npm run dev

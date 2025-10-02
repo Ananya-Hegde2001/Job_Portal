@@ -24,7 +24,7 @@ export default function JobList() {
     if (f.organization_type) params.append('organization_type', f.organization_type);
     if (f.employment_type) params.append('employment_type', f.employment_type);
     if (f.min_experience) params.append('min_experience', f.min_experience);
-    if (f.remote !== '' && f.remote !== undefined) params.append('remote', f.remote);
+    if (f.mode !== '' && f.mode !== undefined) params.append('mode', f.mode);
     if (f.active) params.append('active', '1');
     return params;
   }
@@ -40,6 +40,11 @@ export default function JobList() {
   useEffect(() => {
     const qParams = Object.fromEntries(new URLSearchParams(location.search));
     if (Object.keys(qParams).length) {
+      // Backward compatibility: translate legacy remote=1/0 to mode
+      if (qParams.remote && !qParams.mode) {
+        if (qParams.remote === '1') qParams.mode = 'remote';
+        else if (qParams.remote === '0') qParams.mode = 'onsite';
+      }
       const initFilters = { ...filters, ...qParams };
       setFilters(initFilters);
       setQuickQ(qParams.q||'');
@@ -55,8 +60,11 @@ export default function JobList() {
   function runQuickSearch(e){ e.preventDefault(); const next = { ...filters, q: quickQ, city: quickCity }; setFilters(next); onFilter(next); }
 
   const activeChips = useMemo(()=>{
-    const map = { subject:'Subject', grade:'Grade', city:'City', location:'Region', organization_type:'Org', employment_type:'Type', min_experience:'MaxExp', remote:'Remote', active:'Active' };
-    return Object.entries(filters).filter(([k,v])=> v && v!=='' && v!==false).map(([k,v])=> ({ key:k, label: map[k]||k, value:v }));
+    const map = { subject:'Subject', grade:'Grade', city:'City', location:'Region', organization_type:'Org', employment_type:'Type', min_experience:'MaxExp', mode:'Mode', active:'Active' };
+    const prettyMode = { remote:'Remote', onsite:'On-site', tuition:'Tuition', school:'School', college:'College/University' };
+    return Object.entries(filters)
+      .filter(([k,v])=> v && v!=='' && v!==false)
+      .map(([k,v])=> ({ key:k, label: map[k]||k, value: k==='mode' ? (prettyMode[v]||v) : v }));
   }, [filters]);
   function clearChip(key){ const next={...filters,[key]: key==='active'?false:''}; setFilters(next); onFilter(next); }
   return (

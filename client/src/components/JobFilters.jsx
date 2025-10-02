@@ -4,7 +4,7 @@ const orgTypes = ['', 'government','public_university','deemed','private','inter
 const empTypes = ['', 'full_time','part_time','contract','temporary','guest','visiting'];
 
 export default function JobFilters({ value, onChange }) {
-  const blank = { q:'', subject:'', grade:'', location:'', city:'', organization_type:'', employment_type:'', min_experience:'', remote:'', active:false };
+  const blank = { q:'', subject:'', grade:'', location:'', city:'', organization_type:'', employment_type:'', min_experience:'', mode:'', active:false };
   const [form, setForm] = useState(value || blank);
   useEffect(()=>{ setForm(prev => ({ ...prev, ...value })); }, [value]);
   function update(e){ const f={...form,[e.target.name]: e.target.type==='checkbox' ? e.target.checked : e.target.value}; setForm(f); }
@@ -14,7 +14,25 @@ export default function JobFilters({ value, onChange }) {
     <form onSubmit={submit} className="jobs-filters card">
       <div className="jobs-filters-header">
         <h3>Filters</h3>
-        <button type="button" className="btn-outline btn-sm" onClick={clear} style={{padding:'4px 10px',fontSize:'.6rem'}}>Reset</button>
+        <button
+          type="button"
+          onClick={clear}
+          className="btn-sm"
+          style={{
+            padding:'4px 12px',
+            fontSize:'.6rem',
+            fontWeight:600,
+            background:'var(--color-surface-alt)',
+            border:'1px solid var(--color-border)',
+            borderRadius:'8px',
+            color:'var(--color-text-dim)',
+            cursor:'pointer',
+            lineHeight:1.1,
+            transition:'var(--transition-fast)'
+          }}
+          onMouseOver={e=>{ e.currentTarget.style.background='var(--color-surface)'; e.currentTarget.style.color='#fff'; e.currentTarget.style.borderColor='var(--color-border-strong)'; }}
+          onMouseOut={e=>{ e.currentTarget.style.background='var(--color-surface-alt)'; e.currentTarget.style.color='var(--color-text-dim)'; e.currentTarget.style.borderColor='var(--color-border)'; }}
+        >Reset</button>
       </div>
       <div className="jobs-filter-scroll">
         <div className="filter-row">
@@ -63,11 +81,14 @@ export default function JobFilters({ value, onChange }) {
         </div>
         <div className="filter-row">
           <div>
-            <label>Remote</label>
-            <select name="remote" value={form.remote} onChange={update}>
+            <label>Mode</label>
+            <select name="mode" value={form.mode} onChange={update}>
               <option value="">Any</option>
-              <option value="1">Allowed</option>
-              <option value="0">On-site</option>
+              <option value="remote">Remote</option>
+              <option value="onsite">On-site</option>
+              <option value="tuition">Tuition</option>
+              <option value="school">School</option>
+              <option value="college">College/University</option>
             </select>
           </div>
           <div style={{ display:'flex', alignItems:'flex-end' }}>
@@ -77,7 +98,9 @@ export default function JobFilters({ value, onChange }) {
           </div>
         </div>
       </div>
-      <button className="btn btn-sm" type="submit" style={{marginTop:'4px'}}>Apply Filters</button>
+      <div style={{ textAlign:'center', marginTop:'6px' }}>
+        <button className="btn btn-sm" type="submit" style={{ padding:'0.55rem 1.75rem', minWidth:'150px' }}>Apply Filters</button>
+      </div>
     </form>
   );
 }

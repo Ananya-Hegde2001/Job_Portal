@@ -14,7 +14,7 @@ router.post('/', authRequired, requireRole('teacher'), (req, res, next) => {
     if (!Number.isInteger(job_id) || job_id <= 0) {
       return res.status(400).json({ error: 'Invalid job_id' });
     }
-    const job = db.prepare('SELECT id, status FROM jobs WHERE id = ?').get(job_id);
+  const job = db.prepare('SELECT id, status, title FROM jobs WHERE id = ?').get(job_id);
     if (!job) return res.status(404).json({ error: 'Job not found' });
     if (job.status !== 'approved') return res.status(400).json({ error: 'Job not open for applications' });
 
@@ -24,6 +24,13 @@ router.post('/', authRequired, requireRole('teacher'), (req, res, next) => {
 
     const info = db.prepare('INSERT INTO applications (job_id, teacher_id, cover_letter) VALUES (?,?,?)')
       .run(job_id, req.user.id, cover_letter || null);
+    try {
+      db.prepare('INSERT INTO notifications (user_id, type, message) VALUES (?,?,?)')
+        .run(req.user.id, 'application_submitted', `Application submitted for ${job.title}`);
+    } catch (e) {
+      // ignore notification failure
+      console.warn('Failed to insert submit notification:', e.message);
+    }
     return res.status(201).json({ application: { id: info.lastInsertRowid, job_id, teacher_id: req.user.id, cover_letter: cover_letter || null, status: 'submitted' } });
   } catch (e) {
     // Log full error server-side
@@ -68,11 +75,21 @@ router.get('/employer/recent', authRequired, requireRole('employer','admin'), (r
 router.put('/:id/status', authRequired, requireRole('employer','admin'), (req, res) => {
   const { status } = req.body;
   if (!['submitted','shortlisted','rejected','hired'].includes(status)) return res.status(400).json({ error: 'Bad status'});
-  const appRow = db.prepare('SELECT a.*, j.employer_id FROM applications a JOIN jobs j ON j.id = a.job_id WHERE a.id = ?').get(req.params.id);
+  const appRow = db.prepare('SELECT a.*, j.employer_id, j.title as job_title FROM applications a JOIN jobs j ON j.id = a.job_id WHERE a.id = ?').get(req.params.id);
   if (!appRow) return res.status(404).json({ error: 'Not found'});
   if (req.user.role === 'employer' && appRow.employer_id !== req.user.id) return res.status(403).json({ error: 'Forbidden'});
   db.prepare('UPDATE applications SET status = ? WHERE id = ?').run(status, appRow.id);
+  try {
+    db.prepare('INSERT INTO application_events (application_id, type, detail) VALUES (?,?,?)')
+      .run(appRow.id, 'status_change', status);
+  } catch(e){ /* ignore */ }
   const updated = db.prepare('SELECT * FROM applications WHERE id = ?').get(appRow.id);
+  try {
+    db.prepare('INSERT INTO notifications (user_id, type, message) VALUES (?,?,?)')
+      .run(appRow.teacher_id, 'application_status', `Your application for ${appRow.job_title} is ${status}`);
+  } catch (e) {
+    console.warn('Failed to insert status notification:', e.message);
+  }
   res.json({ application: updated });
 });
 

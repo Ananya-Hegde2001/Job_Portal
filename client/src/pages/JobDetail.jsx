@@ -11,8 +11,13 @@ export default function JobDetail() {
   const [applying, setApplying] = useState(false);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const { user } = useAuth();
+  const [saving, setSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const navigate = useNavigate();
-  useEffect(() => { api.get(`/jobs/${id}`).then(r => setJob(r.job)); }, [id]);
+  useEffect(() => { api.get(`/jobs/${id}`).then(r => {
+    setJob(r.job);
+    setIsSaved(!!r.job.is_saved);
+  }); }, [id]);
   useEffect(() => {
     if (user?.role !== 'teacher') return;
     let mounted = true;
@@ -35,12 +40,28 @@ export default function JobDetail() {
       .catch(e => setMsg(e.message || 'Apply failed'))
       .finally(()=> setApplying(false));
   }
+  async function toggleSave(){
+    if (!user || user.role !== 'teacher' || saving) return;
+    setSaving(true);
+    try {
+      const res = await api.toggleSaveJob(job.id);
+      setIsSaved(res.saved === true);
+    } catch(e){ console.warn(e); }
+    finally{ setSaving(false); }
+  }
   if (!job) return <div>Loading...</div>;
   const skills = job.skills_required ? job.skills_required.split(',').map(s=>s.trim()).filter(Boolean) : [];
   return (
     <div className="grid" style={{ gap: '1.5rem', maxWidth: 1000 }}>
       <div className="card" style={{ padding: '1.5rem 1.6rem' }}>
-        <h2 style={{ marginTop: 0 }}>{job.title}</h2>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:'1rem' }}>
+          <h2 style={{ marginTop: 0 }}>{job.title}</h2>
+          {user?.role==='teacher' && (
+            <button onClick={toggleSave} disabled={saving} className={`save-toggle ${isSaved? 'saved':''}`} style={{ alignSelf:'flex-start' }}>
+              {isSaved? '★ Saved':'☆ Save'}
+            </button>
+          )}
+        </div>
         <p className="muted" style={{ marginTop: '-.4rem', fontSize:'.8rem' }}>{job.institution_name || job.employer_name} {job.city && '· '+ job.city} {job.remote_allowed ? '· Remote' : ''}</p>
         <div style={{ display:'flex', flexWrap:'wrap', gap:'.4rem', margin:'0 0 1rem' }}>
           {job.employment_type && <span className="badge-status">{job.employment_type}</span>}

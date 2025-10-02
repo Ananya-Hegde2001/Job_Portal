@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../state/AuthContext.jsx';
 import AuthModal from '../components/AuthModal.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
@@ -7,6 +7,7 @@ import PasswordInput from '../components/PasswordInput.jsx';
 export default function Login() {
   const { login } = useAuth();
   const nav = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [role, setRole] = useState('teacher');
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,10 @@ export default function Login() {
     setError(null);
     setLoading(true);
     login(form.email.trim(), form.password)
-      .then(() => nav('/'))
+      .then(() => {
+        const target = location.state?.from?.pathname || '/';
+        nav(target, { replace: true });
+      })
       .catch(err => setError(err.message || 'Login failed'))
       .finally(() => setLoading(false));
   }

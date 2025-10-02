@@ -1,17 +1,61 @@
 import { Link, useNavigate } from 'react-router-dom';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import Modal from '../components/ui/Modal.jsx';
+import { showToast } from '../util/toast.js';
 
 export default function Home(){
+  const { t } = useTranslation();
   const nav = useNavigate();
   const [q,setQ] = React.useState('');
   const [city,setCity] = React.useState('');
   function onSearch(e){ e.preventDefault(); const p=new URLSearchParams(); if(q) p.set('q', q); if(city) p.set('city', city); nav('/jobs?'+p.toString()); }
+  // Stats with numeric targets for animation
   const stats = [
-    { label:'Active Jobs', value:'2.4k+' },
-    { label:'Universities', value:'1.1k+' },
-    { label:'Educators', value:'18k+' },
-    { label:'Match Rate', value:'94%' }
+    { label:t('home.stats.activeJobs'), end:2400, type:'plus' },
+    { label:t('home.stats.universities'), end:1100, type:'plus' },
+    { label:t('home.stats.educators'), end:18000, type:'plus' },
+    { label:t('home.stats.matchRate'), end:94, type:'percent' }
   ];
+
+  function AnimatedStat({ end, type, label, duration=1400 }) {
+    const [display,setDisplay] = React.useState('0');
+    React.useEffect(()=>{
+      // Reduced motion: jump straight to final
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        if(type==='plus') setDisplay(end + '+');
+        else if(type==='percent') setDisplay(end+'%');
+        else setDisplay(end.toString());
+        return;
+      }
+      let frame; const start = performance.now();
+      function format(current){
+        if(type==='plus') {
+          const val = Math.min(Math.round(current), end);
+          return val >= end ? end + '+' : val.toString();
+        } else if(type==='percent') {
+          return Math.min(Math.round(current), end) + '%';
+        }
+        return Math.round(current).toString();
+      }
+      function tick(now){
+        const elapsed = now - start;
+        const p = Math.min(1, elapsed / duration);
+        const eased = 1 - Math.pow(1-p,3);
+        const current = end * eased;
+        setDisplay(format(current));
+        if(p < 1) frame = requestAnimationFrame(tick); else setDisplay(format(end));
+      }
+      frame = requestAnimationFrame(tick);
+      return ()=> cancelAnimationFrame(frame);
+    }, [end, type, duration]);
+    return (
+      <div className="hero-stat">
+        <div className="val" aria-label={label+': '+display}>{display}</div>
+        <div className="lbl">{label}</div>
+      </div>
+    );
+  }
   // Curated domain categories (six popular domains)
   const categories = [
     { name:'EdTech', icon:'stem' },
@@ -34,21 +78,46 @@ export default function Home(){
       default: return <svg {...baseProps} viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>;
     }
   }
-  const features = [
-    { title:'Precision Matching', text:'Structured academic metadata surfaces roles aligned with your expertise.', icon:'🎯' },
-    { title:'Institution Profiles', text:'Transparent university & school profiles build trust early.', icon:'🏫' },
-    { title:'Draft & Publish Flow', text:'Employers stage perfect postings before going live.', icon:'📝' },
-    { title:'Real-Time Expansion', text:'Architecture ready for messaging & application analytics.', icon:'⚡' }
-  ];
   const steps = [
-    { n:1, title:'Create Profile', text:'Highlight subjects, credentials & achievements.' },
-    { n:2, title:'Explore Roles', text:'Filter by subject, institution type, & location.' },
-    { n:3, title:'Apply & Track', text:'Stay informed as your applications progress.' },
-    { n:4, title:'Grow Career', text:'Leverage insights to refine and advance.' }
+    { n:1, title:t('home.steps.1t'), text:t('home.steps.1d') },
+    { n:2, title:t('home.steps.2t'), text:t('home.steps.2d') },
+    { n:3, title:t('home.steps.3t'), text:t('home.steps.3d') },
+    { n:4, title:t('home.steps.4t'), text:t('home.steps.4d') }
   ];
   const jobCategories = ['Coaching','School','Pre-School','EdTech','College/University','Vocational Training Institute'];
   const jobLocations = ['Chennai','Kolkata','Hyderabad','Ahmedabad','Mumbai','Jaipur','Bangalore','Pune','Delhi','Indore','Bhubaneswar','Coimbatore','Patna','Agra','Lucknow'];
   const jobDesignations = ['Teacher Jobs','Biology Teacher Jobs','Science Teacher Jobs','Hindi Teacher Jobs','Social Science Teacher Jobs','Physics Teacher Jobs','Chemistry Teacher Jobs','Assistant Teacher Jobs','Computer Science Teacher Jobs','Economics Teacher Jobs','Accountancy Teacher Jobs','Academic Coordinator Jobs','English Language Teacher Jobs','General Teacher Jobs','Geography Teacher Jobs','Academic Counsellor Jobs','Accountant Jobs','Administration Executive Jobs'];
+  // Pricing / Upgrade state
+  const [upgradeOpen,setUpgradeOpen] = React.useState(false);
+  const [selectedPlan,setSelectedPlan] = React.useState('pro');
+  const [billingCycle,setBillingCycle] = React.useState('monthly'); // monthly | yearly | lifetime
+
+  const billingOptions = [
+    { id:'monthly', label:'Monthly', note:'Billed monthly • Cancel anytime', price:999, suffix:'/mo' },
+    { id:'yearly', label:'Yearly', note:'Billed annually • Cancel anytime', price:799, suffix:'/mo', subNote:'Equivalent per month (₹9,588 billed yearly)', highlight:true },
+    { id:'lifetime', label:'Lifetime', note:'One-time payment • Lifetime access', price:14999, suffix:' one-time', oneTime:true }
+  ];
+
+  const coreFeatures = [
+    'Unlimited job applications (teachers)',
+    'AI-assisted candidate matching (employers)',
+    'Advanced salary intelligence & benchmarking',
+    'Institution review insights & sentiment summaries',
+    'Priority job listing exposure (employers)',
+    'Automated applicant screening rules',
+    'Candidate shortlists & CSV export',
+    'Team seats (up to 5 recruiters)',
+    'Real-time application status analytics',
+    'Email & in-app notifications',
+    'API access (beta)',
+    'Priority support SLA'
+  ];
+
+  function handleUpgrade(){
+    if(!selectedPlan){ showToast('Select a plan first','error'); return; }
+    showToast(`Upgraded to ${selectedPlan.toUpperCase()} plan (${billingCycle})`,'success');
+    setUpgradeOpen(false);
+  }
 
   function Marquee({ items, param, reverse=false, speed=25 }) {
     const content = [...items, ...items];
@@ -68,21 +137,18 @@ export default function Home(){
       <header className="home-hero">
         <div className="hero-bg-layers" />
         <div className="hero-inner">
-          <div className="hero-pre">Academic Talent Marketplace</div>
-          <h1>Discover & Advance Your Teaching Career</h1>
-          <p className="hero-sub">Curated opportunities across universities, schools & institutes—powered by structured academic data for precise matching.</p>
+          <div className="hero-pre">{t('home.pre')}</div>
+          <h1 className="shiny-text" data-animate-shine>{t('home.title')}</h1>
+          <p className="hero-sub">{t('home.sub')}</p>
           <form onSubmit={onSearch} className="hero-search">
-            <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search subjects, titles, institutions" />
+            <input value={q} onChange={e=>setQ(e.target.value)} placeholder={t('home.searchWhat')} />
             <div className="sep" />
-            <input value={city} onChange={e=>setCity(e.target.value)} placeholder="City or remote" />
-            <button className="btn">Search</button>
+            <input value={city} onChange={e=>setCity(e.target.value)} placeholder={t('home.searchWhere')} />
+            <button className="btn">{t('home.search')}</button>
           </form>
           <div className="hero-stats">
             {stats.map(s => (
-              <div key={s.label} className="hero-stat">
-                <div className="val">{s.value}</div>
-                <div className="lbl">{s.label}</div>
-              </div>
+              <AnimatedStat key={s.label} end={s.end} type={s.type} label={s.label} />
             ))}
           </div>
         </div>
@@ -91,8 +157,8 @@ export default function Home(){
   <section className="home-section cat-modern flat-block">
         <div className="cat-head">
           <div className="cat-titles">
-            <h2>Explore Academic Domains</h2>
-            <p>Navigate structured knowledge areas & supporting functions with precision.</p>
+            <h2>{t('home.exploreDomains')}</h2>
+            <p>{t('home.exploreDesc')}</p>
           </div>
         </div>
         <div className="cat-showcase">
@@ -107,41 +173,17 @@ export default function Home(){
               <span className="cat-icon" aria-hidden><CatIcon type={c.icon} /></span>
               <span className="cat-meta">
                 <span className="cat-name">{c.name}</span>
-                <span className="cat-link">Browse roles</span>
+                <span className="cat-link">{t('home.browseRoles')}</span>
               </span>
             </button>
-          ))}
-        </div>
-      </section>
-  {/* Redesigned Advantages Section (Flat) */}
-  <section className="home-section advantages-modern flat-block">
-        <div className="adv-head">
-          <div>
-            <h2>Platform Advantages</h2>
-            <p>Engineered for academic hiring velocity & clarity.</p>
-          </div>
-          <div className="adv-accent" aria-hidden>
-            <div className="orb orb-a" />
-            <div className="orb orb-b" />
-          </div>
-        </div>
-        <div className="adv-grid">
-          {features.map((f,i) => (
-            <div key={f.title} className="adv-card" style={{'--i': i}}>
-              <div className="adv-ring" />
-              <div className="adv-ic">{f.icon}</div>
-              <h3>{f.title}</h3>
-              <p>{f.text}</p>
-              <span className="adv-line" />
-            </div>
           ))}
         </div>
       </section>
       {/* Flat How It Works */}
       <section className="how-flat">
         <div className="how-head">
-          <h2>How It Works</h2>
-          <p>Focused, transparent steps from sign-up to long‑term growth.</p>
+          <h2>{t('home.how')}</h2>
+          <p>{t('home.howDesc')}</p>
         </div>
         <div className="how-flow">
           {steps.map(s => (
@@ -156,16 +198,16 @@ export default function Home(){
         </div>
       </section>
       <section className="home-section jobs-groups">
-        <h2 style={{ textAlign:'center', marginBottom:'.75rem', marginTop:0 }}>Jobs by Categories</h2>
+  <h2 style={{ textAlign:'center', marginBottom:'.75rem', marginTop:0 }}>{t('home.jobsByCategories')}</h2>
         <div className="pill-row center-wrap">
           {jobCategories.map(c => <button key={c} className="pill" onClick={()=>nav('/jobs?q='+encodeURIComponent(c))}>{c}</button>)}
         </div>
-        <h2 style={{ textAlign:'center', margin:'1.3rem 0 .6rem' }}>Jobs by Locations</h2>
+  <h2 style={{ textAlign:'center', margin:'1.3rem 0 .6rem' }}>{t('home.jobsByLocations')}</h2>
         <div style={{display:'flex',flexDirection:'column',gap:'.55rem'}}>
           <Marquee items={jobLocations.slice(0, Math.ceil(jobLocations.length/2)).map(l=>`Teacher jobs in ${l}`)} param="city" speed={22} />
           <Marquee items={jobLocations.slice(Math.ceil(jobLocations.length/2)).map(l=>`Teacher jobs in ${l}`)} param="city" reverse speed={24} />
         </div>
-        <h2 style={{ textAlign:'center', margin:'1.3rem 0 .6rem' }}>Jobs by Designations</h2>
+  <h2 style={{ textAlign:'center', margin:'1.3rem 0 .6rem' }}>{t('home.jobsByDesignations')}</h2>
         <div style={{display:'flex',flexDirection:'column',gap:'.55rem'}}>
           <Marquee items={jobDesignations.slice(0, Math.ceil(jobDesignations.length/2))} param="q" speed={26} />
             <Marquee items={jobDesignations.slice(Math.ceil(jobDesignations.length/2))} param="q" reverse speed={28} />
@@ -173,12 +215,97 @@ export default function Home(){
       </section>
       <section className="home-cta">
         <div className="cta-inner">
-          <h2>Join the Academic Hiring Evolution</h2>
-            <p>Be an early participant in a platform purpose-built for educators and institutions.</p>
+          <h2>{t('home.ctaTitle')}</h2>
+            <p>{t('home.ctaSub')}</p>
           <div className="cta-actions">
-            <Link to="/signup" className="btn btn-lg">Create Account</Link>
-            <Link to="/post-job" className="btn-outline btn-lg">Post a Job</Link>
+            <Link to="/signup" className="btn btn-lg">{t('home.ctaCreate')}</Link>
+            <Link to="/post-job" className="btn-outline btn-lg">{t('home.ctaPost')}</Link>
           </div>
+        </div>
+      </section>
+      {/* Pricing Section */}
+      <section className="home-pricing">
+        <div className="pricing-wrap">
+          {/* Decorative meteor effect (non-essential visual) */}
+          <div className="pricing-meteors" aria-hidden="true">
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            <span className="meteor" />
+            {/* Added extra meteors for richer effect */}
+            <span className="meteor alt" />
+            <span className="meteor" />
+            <span className="meteor alt" />
+            <span className="meteor" />
+            <span className="meteor alt" />
+            <span className="meteor" />
+            <span className="meteor alt" />
+            <span className="meteor" />
+            <span className="meteor alt" />
+            <span className="meteor" />
+          </div>
+          <div className="pricing-head">
+            <h2>Simple, transparent pricing</h2>
+            <p>Flexible billing built for educators, recruiters, and growing institutions. Upgrade anytime—no hidden fees.</p>
+          </div>
+          <div className="pricing-grid">
+            <div className="pricing-left">
+              <div className="billing-options">
+                {/* Current (Free) plan - non interactive */}
+                <button type="button" className="billing-card disabled current-plan" aria-disabled="true">
+                  <div className="bill-top">
+                    <div className="bill-label">Free</div>
+                    <div className="bill-price">₹0 <span className="bill-suffix">/mo</span></div>
+                  </div>
+                  <div className="bill-note">Your current plan</div>
+                  <div className="bill-sub">Basic access for teachers & single employer usage.</div>
+                </button>
+                {billingOptions.map(opt => (
+                  <button key={opt.id} onClick={()=>setBillingCycle(opt.id)} className={`billing-card ${billingCycle===opt.id?'active':''} ${opt.highlight?'highlight':''}`} aria-pressed={billingCycle===opt.id}>
+                    <div className="bill-top">
+                      <div className="bill-label">{opt.label}</div>
+                      <div className="bill-price">₹{opt.price.toLocaleString()} <span className="bill-suffix">{opt.suffix}</span></div>
+                    </div>
+                    <div className="bill-note">{opt.note}</div>
+                    {opt.subNote && <div className="bill-sub">{opt.subNote}</div>}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="pricing-right">
+              <div className="pricing-plan-box">
+                <div className="plan-price-big">₹{billingOptions.find(b=>b.id===billingCycle).price.toLocaleString()} <span className="plan-price-cycle">{billingOptions.find(b=>b.id===billingCycle).suffix}</span></div>
+                <div className="plan-cycle-note">{billingOptions.find(b=>b.id===billingCycle).note}</div>
+                <ul className="feature-list">
+                  {coreFeatures.map(f => <li key={f}>{f}</li>)}
+                </ul>
+                <button className="btn btn-lg pricing-cta" onClick={()=>setUpgradeOpen(true)}>Upgrade Now</button>
+                <div className="pricing-fine">All prices in INR. Taxes may apply. Lifetime includes future feature releases (excludes 3rd-party paid add-ons).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="home-section">
+        <div className="help-cta">
+          <div className="help-left">
+            <span className="help-icon" aria-hidden>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4"/><line x1="12" y1="17.5" x2="12" y2="17.51"/></svg>
+            </span>
+            <div>
+              <h3 className="help-title">{t('home.helpTitle')}</h3>
+              <p className="help-sub">{t('home.helpSub')}</p>
+            </div>
+          </div>
+          <Link to="/help" className="btn">{t('home.helpOpen')}</Link>
         </div>
       </section>
       <div className="social-bar">
@@ -195,7 +322,34 @@ export default function Home(){
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"/><path d="m22 6-10 7L2 6"/></svg>
         </a>
       </div>
-      <footer className="site-footer">© {new Date().getFullYear()} JobPortal • Empowering educators & institutions.</footer>
+  <footer className="site-footer">{t('home.footer', { year: new Date().getFullYear() })}</footer>
+  <Modal
+    open={upgradeOpen}
+    title="Confirm plan upgrade"
+    onClose={()=>setUpgradeOpen(false)}
+    onSubmit={handleUpgrade}
+    primaryLabel="Confirm Upgrade"
+    secondaryLabel="Cancel"
+    width={620}
+  >
+    <div style={{display:'grid',gap:'.9rem'}}>
+      <div style={{fontSize:'.7rem',letterSpacing:'.5px',fontWeight:600,color:'var(--color-text-dim)'}}>CHOOSE PLAN</div>
+      <div className="plan-grid">
+        {['basic','pro','team'].map(p => (
+          <label key={p} className={`plan-card ${selectedPlan===p?'active':''}`} style={{cursor:'pointer'}}>
+            <input type="radio" name="plan" value={p} checked={selectedPlan===p} onChange={()=>setSelectedPlan(p)} style={{position:'absolute',opacity:0}} />
+            <div className="plan-name" style={{fontWeight:700,textTransform:'uppercase',fontSize:'.7rem',letterSpacing:'.8px'}}>{p}</div>
+            <div className="plan-desc" style={{fontSize:'.6rem',color:'var(--color-text-dim)'}}>
+              {p==='basic' && 'Starter essentials'}
+              {p==='pro' && 'Advanced visibility & analytics'}
+              {p==='team' && 'Scaling hiring collaboration'}
+            </div>
+          </label>
+        ))}
+      </div>
+      <p style={{fontSize:'.6rem',margin:'0',color:'var(--color-text-dim)'}}>Upgrade flow is simulated. Integrate real payments (Stripe/Razorpay) later.</p>
+    </div>
+  </Modal>
     </div>
   );
 }

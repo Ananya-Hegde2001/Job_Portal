@@ -32,3 +32,18 @@ export function loadUser(req, res, next) {
   req.user.full = row;
   next();
 }
+
+// Optional auth: if a Bearer token is supplied and valid attach req.user, else continue silently
+export function maybeAuth(req, res, next) {
+  const auth = req.headers.authorization;
+  if (auth?.startsWith('Bearer ')) {
+    try {
+      const token = auth.slice(7);
+      const payload = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = payload;
+    } catch (e) {
+      // ignore invalid token for public endpoints
+    }
+  }
+  next();
+}

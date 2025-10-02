@@ -5,6 +5,7 @@ import App from './App.jsx';
 import Toaster from './components/Toaster.jsx';
 import { AuthProvider } from './state/AuthContext.jsx';
 import './styles.css';
+import './i18n.js';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
