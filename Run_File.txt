@@ -37,7 +37,6 @@ password123
 
 
 
-
 database storage (sqlite)
 
 open database

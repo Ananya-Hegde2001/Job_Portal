@@ -1,0 +1,159 @@
+{\rtf1\ansi\deff0
+{\fonttbl {\f0 Times New Roman;} {\f1 Arial;}}
+\widowctrl
+\margl1440\margr1440\margt1440\margb1440
+\fs24
+\pard\qc\b\fs36 TEACHER JOB PORTAL\par
+\pard\qc\b0\fs24 Project Synopsis\par
+\pard\qc Version 1.0 | Date: October 2, 2025\par
+\pard\qc Prepared By: <Your Name / Team>\par
+\pard\sa300\par
+\pard\b 1. Abstract\b0\par
+The Teacher Job Portal is a centralized, domain-specific recruitment and talent management web platform designed for schools, colleges, training institutes, and freelance educators. It enables institutions to publish structured vacancies and manage candidate lifecycles while empowering teachers to showcase comprehensive professional profiles and apply efficiently. Core capabilities include job posting and moderation, advanced filtering, multilingual interface (Indian languages), secure document handling, application status tracking, notifications, dashboards, and a scalable architecture prepared for AI-driven matching. Emphasis is placed on usability, transparency, performance, security, and future extensibility.\par
+\par
+\b 2. Problem Statement\b0\par
+Educational hiring is often fragmented across emails, spreadsheets, and generic job portals. Consequences include: (a) high administrative overhead, (b) unstructured and inconsistent candidate data, (c) poor subject-specialization matching, (d) slow feedback cycles, (e) limited analytics, and (f) lack of fair visibility for qualified educators. A focused platform tailored to educator hiring alleviates these inefficiencies and improves placement quality and speed.\par
+\par
+\b 3. Objectives\b0\par
+\i Functional Objectives:\i0\par
+\tab - Structured teacher profiles (subjects, boards, qualifications, experience, certifications).\par
+\tab - Institution registration, job lifecycle (create, edit, archive).\par
+\tab - Intelligent search & filters (subject, location, experience, salary band, job type, board affiliation).\par
+\tab - Application submission with resume and supporting documents.\par
+\tab - Status tracking (Received, Shortlisted, Interview Scheduled, Offered, Rejected, Hired).\par
+\tab - Real-time or near-real-time notifications (email / in-app).\par
+\tab - Analytics dashboards (funnel metrics, time-to-fill, offer acceptance).\par
+\tab - Admin oversight (user governance, moderation, audit trail).\par
+\i Non-Functional Objectives:\i0\par
+\tab - Availability ≥ 99%.\par
+\tab - Page response < 2 seconds (p50) under baseline load.\par
+\tab - Secure storage & transmission (TLS, hashed credentials).\par
+\tab - Horizontal scalability for seasonal spikes.\par
+\tab - WCAG 2.1 AA accessibility baseline.\par
+\tab - Internationalization-ready architecture.\par
+\par
+\b 4. Scope\b0\par
+In-Scope (Phase 1): Responsive web UI, teacher and institution roles, job posting & browsing, profile management, application submission, status workflow, notifications, basic dashboards, audit logs, document uploads, localization base layer, multi-language content strings, basic recommendation heuristics.\par
+Out-of-Scope (Initial Release): Native mobile apps, deep AI semantic matching, payroll/onboarding modules, background check integrations, payment gateways, LMS or HRIS integration, full-text semantic resume parsing, advanced calendar scheduling.\par
+Assumptions: Stable internet connectivity, valid contact information, institutional authenticity verification handled manually in first iteration.\par
+Constraints: Budget/time-box, compliance with regional data privacy, language translation accuracy dependent on contributors.\par
+\par
+\b 5. Stakeholders\b0\par
+Primary: Teachers (candidates), Institution recruiters/HR, System administrators.\par
+Secondary: Academic coordinators, regulatory reviewers (read-only), future integration partners (API consumers).\par
+\par
+\b 6. System Overview\b0\par
+The platform comprises a React (Vite) frontend consuming a RESTful Node.js/Express backend. Data persistence uses an SQL database (initially SQLite, migration path to PostgreSQL). Modules include: Authentication & Authorization, Profile Management, Job Management, Search & Filtering, Applications & Status Tracking, Notifications, Analytics, and Administration. Internationalization (i18n) supports multiple Indian languages. Architecture enforces separation of concerns with modular route controllers and service layers.\par
+\par
+\b 7. Existing Challenges\b0\par
+Prior fragmented processes lead to: manual duplication, inconsistent candidate evaluation criteria, poor tracking of funnel effectiveness, delayed decisions, limited long-term talent pooling, and minimal data-driven insights.\par
+\par
+\b 8. Proposed Solution Benefits\b0\par
+Centralization, structured metadata, faster screening, transparent status visibility, analytics for optimization, security controls, extensible plugin-like future integration, and prepared AI augmentation layer.\par
+\par
+\b 9. Functional Requirements (Representative)\b0\par
+FR1: User registration with email verification.\par
+FR2: Teacher profile creation (mandatory: name, email, location, subjects, experience).\par
+FR3: Institution job posting with validation (title, description, subject requirements, experience, salary range).\par
+FR4: Job search with multi-criteria filtering.\par
+FR5: Application submission (resume + cover letter + optional video link).\par
+FR6: Application status transitions logged with timestamps.\par
+FR7: Notifications on status change (in-app + queued email).\par
+FR8: Admin moderation of postings and account suspension.\par
+FR9: Dashboard metrics (open roles, applicant counts per stage, time-to-fill).\par
+FR10: Export applicants (CSV).\par
+FR11: Secure document upload (type/size validation, virus scan placeholder).\par
+FR12: Audit logging of critical actions (auth events, status transitions).\par
+\par
+\b 10. Non-Functional Requirements\b0\par
+Performance: Support 1000 concurrent sessions baseline.\par
+Security: OWASP Top 10 mitigations, password hashing (Bcrypt/Argon2), role-based access control (RBAC), token revocation strategy.\par
+Reliability: Daily backups; RPO ≤ 24h; RTO ≤ 4h.\par
+Maintainability: Layered architecture, linting, code style enforcement, modular services.\par
+Scalability: Stateless API nodes behind load balancer; CDN for static assets; distinct media storage.\par
+Accessibility: Semantic HTML, ARIA mapping, color contrast, keyboard navigation.\par
+Logging & Monitoring: Central aggregated logs with alert thresholds (error rate > 2%).\par
+Internationalization: Lazy-loaded locale bundles, pluralization support.\par
+\par
+\b 11. Architecture (Conceptual Layers)\b0\par
+Presentation Layer (React) -> API Layer (Express REST) -> Service Layer (Business logic) -> Data Layer (SQL DB + caching) -> External Services (Email, Storage, Future Queue).\par
+Data Flow Example (Application Submission): Teacher -> UI -> API (validation) -> DB (Applications + StatusHistory) -> Notification queue (future) -> Email dispatch -> UI acknowledgment.\par
+\par
+\b 12. Technology Stack (Planned / Current)\b0\par
+Frontend: React, Vite, Context API, i18n framework.\par
+Backend: Node.js (Express), modular routing, middleware pipeline.\par
+Database: SQLite (development) -> PostgreSQL (scaling).\par
+Cache (Future): Redis.\par
+Queue (Future): RabbitMQ or AWS SQS.\par
+Auth: JWT Access + Refresh tokens, password hashing.\par
+Storage: Object storage (S3 / equivalent) for documents.\par
+CI/CD (Planned): GitHub Actions.\par
+Testing: Jest (unit), Supertest (API), Cypress (E2E).\par
+Deployment: Containerized (Docker) or managed platform (App Service / ECS).\par
+\par
+\b 13. Database Design (Core Entities)\b0\par
+Teachers(id, name, email, password_hash, location, experience_years, subjects[], qualifications, certifications, bio, created_at).\par
+Institutions(id, name, email, address, type, accreditation_code, contact_person, created_at).\par
+Jobs(id, institution_id, title, description, subjects_required[], min_experience, qualifications_required, salary_min, salary_max, contract_type, location, status, posted_at, expires_at).\par
+Applications(id, job_id, teacher_id, status, cover_letter, resume_path, video_link, applied_at, updated_at).\par
+StatusHistory(id, application_id, old_status, new_status, changed_at, changed_by).\par
+Notifications(id, user_id, type, payload_json, is_read, created_at).\par
+AuditLogs(id, actor_id, entity_type, entity_id, action, meta_json, created_at).\par
+Indexes on (subjects, location, status, composite(job_id,status)).\par
+\par
+\b 14. UML & Diagrams (Descriptive)\b0\par
+Use Cases: Post Job, Apply to Job, Update Status, View Dashboard, Moderate Account.\par
+Sequence (Apply): Actor -> UI -> API -> Validation -> Persist -> Queue -> Email -> Response.\par
+Class Model: User (abstract), Teacher(User), Institution(User), Job, Application, StatusHistory, Notification, AuditLog.\par
+\par
+\b 15. Data Flow Diagram (Narrative)\b0\par
+Level 0: Users interact with Portal; Portal reads/writes DB; triggers notification channel.\par
+Level 1 (Status Update): Recruiter -> API -> Update Application.status -> Insert StatusHistory -> Create Notification -> Deliver.\par
+\par
+\b 16. Security Considerations\b0\par
+Input validation, output encoding, strict CSP (future), rate limiting on auth endpoints, account lockout after repeated failures, secure cookie flags, token rotation, least privilege DB roles, audit review triggers for unusual activity.\par
+\par
+\b 17. Testing Strategy\b0\par
+Unit: Service logic & validators.\par
+Integration: Auth + Job posting + Application pipeline.\par
+E2E: Candidate journey (register -> apply), Recruiter journey (post -> review -> update status).\par
+Performance: k6/JMeter baseline load test.\par
+Security: Dependency scanning, static analysis, minimal dynamic scan.\par
+UAT: Stakeholder walkthrough scripts.\par
+\par
+\b 18. Implementation Plan (Phased)\b0\par
+Phase 1 (Weeks 1-3): Core auth, teacher profiles, institution onboarding.\par
+Phase 2 (Weeks 4-6): Job posting, search filters, listing UI.\par
+Phase 3 (Weeks 7-9): Applications, status transitions, notifications.\par
+Phase 4 (Weeks 10-12): Dashboards, analytics, audit logs.\par
+Phase 5 (Weeks 13-14): Hardening (security, performance, accessibility).\par
+Phase 6 (Week 15): UAT, documentation, deployment readiness.\par
+Phase 7 (Post): Monitoring & iterative enhancements.\par
+\par
+\b 19. Risk Analysis & Mitigation\b0\par
+Technical: Query performance (Mitigate by indexing, caching).\par
+Security: Credential compromise (Mitigate by hashing, MFA future).\par
+Adoption: Low recruiter engagement (Mitigate with guided onboarding, metrics).\par
+Regulatory: Data retention (Mitigate configurable purge jobs).\par
+Operational: Third-party email outages (Mitigate fallback provider).\par
+\par
+\b 20. Future Enhancements\b0\par
+AI-based match scoring, automated resume parsing, in-platform scheduling & calendar sync, video interview integration, endorsement gamification, mobile apps, exposure weighting by performance analytics, API partner ecosystem.\par
+\par
+\b 21. Maintenance & Monitoring Strategy\b0\par
+Health endpoints, structured logging, metrics (latency, error %, queue depth), automated backups, dependency scanning schedule, quarterly disaster recovery drills, SLA review.\par
+\par
+\b 22. Conclusion\b0\par
+This Teacher Job Portal lays a robust, modular foundation for transforming educator recruitment. It reduces friction, enhances quality and speed of placements, and provides a scalable base for analytics and AI augmentation. Phased delivery ensures early value while preserving a clean growth trajectory for advanced capabilities.\par
+\par
+\b 23. References\b0\par
+OWASP Secure Coding Guidelines; WCAG 2.1; PostgreSQL Documentation; ISO 27001 (conceptual alignment); REST and JWT best practices.\par
+\par
+\b Appendix Placeholders\b0\par
+A. ER Diagram\par
+B. Use Case Diagram\par
+C. Sequence Diagram (Application Flow)\par
+D. Sample Wireframes (Landing, Job Detail, Application Form, Dashboard)\par
+\par
+\pard\qc --- End of Document ---\par
+}
