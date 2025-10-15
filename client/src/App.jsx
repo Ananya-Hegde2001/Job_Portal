@@ -20,14 +20,17 @@ import JobDetail from './pages/JobDetail.jsx';
 import PostJob from './pages/PostJob.jsx';
 import Profile from './pages/Profile.jsx';
 import JobAlerts from './pages/JobAlerts.jsx';
+import Notifications from './pages/Notifications.jsx';
 import { useAuth } from './state/AuthContext.jsx';
 import LanguageSelect from './components/LanguageSelect.jsx';
 import FloatingFeedback from './components/FloatingFeedback.jsx';
+import { api } from './util/api.js';
 
 function Nav() {
   const { user, logout } = useAuth();
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef(null); // wrapper for button + dropdown
+  const [unread, setUnread] = React.useState(0);
   const [theme, setTheme] = React.useState(()=>{
     if (typeof window === 'undefined') return 'dark';
     return localStorage.getItem('jp-theme') || 'dark';
@@ -76,6 +79,25 @@ function Nav() {
       document.removeEventListener('keydown', handleKey);
     };
   }, [open]);
+
+  // Poll notifications count when logged in
+  React.useEffect(()=>{
+    let timer;
+    async function fetchCount(){
+      if (!user) { setUnread(0); return; }
+      try{
+        const res = await api.listNotifications();
+        const items = res.notifications || [];
+        const count = items.filter(n => !n.is_read).length;
+        setUnread(count);
+      } catch(_) { /* ignore */ }
+    }
+    fetchCount();
+    if (user) {
+      timer = setInterval(fetchCount, 60000);
+    }
+    return ()=>{ if (timer) clearInterval(timer); };
+  }, [user]);
   return (
     <div className="navbar">
       <div className="navbar-inner">
@@ -103,10 +125,55 @@ function Nav() {
             {t('nav.aiChat')}
             {!user && <span style={{marginLeft:4,fontSize:'10px',opacity:.6}}>🔒</span>}
           </Link>
-          {user?.role === 'teacher' && <Link className={active('/alerts')} to="/alerts">Alerts</Link>}
-          {user?.role === 'teacher' && <Link to="/dashboard/teacher">{t('nav.teacherDash')}</Link>}
-          {user?.role === 'employer' && <Link to="/dashboard/employer">{t('nav.employerDash')}</Link>}
-          {user?.role === 'admin' && <Link to="/admin">{t('nav.admin')}</Link>}
+          {/* Alerts link removed from navbar for teachers per request */}
+          {user?.role === 'teacher' && (
+            <>
+              <Link to="/dashboard/teacher">{t('nav.teacherDash')}</Link>
+              <Link className={active('/notifications')} to="/notifications" style={{ position:'relative' }} title="Notifications">
+                <span style={{ display:'inline-flex', alignItems:'center', gap:'.3rem' }}>
+                  <span aria-hidden>🔔</span>
+                  <span className="visually-hidden">Notifications</span>
+                </span>
+                {unread > 0 && (
+                  <span style={{ position:'absolute', top:'-4px', right:'-8px', background:'#ef4444', color:'#fff', fontWeight:700, fontSize:'10px', borderRadius:'999px', padding:'1px 5px', boxShadow:'0 0 0 2px var(--color-surface)' }}>
+                    {unread > 9 ? '9+' : unread}
+                  </span>
+                )}
+              </Link>
+            </>
+          )}
+          {user?.role === 'employer' && (
+            <>
+              <Link to="/dashboard/employer">{t('nav.employerDash')}</Link>
+              <Link className={active('/notifications')} to="/notifications" style={{ position:'relative' }} title="Notifications">
+                <span style={{ display:'inline-flex', alignItems:'center', gap:'.3rem' }}>
+                  <span aria-hidden>🔔</span>
+                  <span className="visually-hidden">Notifications</span>
+                </span>
+                {unread > 0 && (
+                  <span style={{ position:'absolute', top:'-4px', right:'-8px', background:'#ef4444', color:'#fff', fontWeight:700, fontSize:'10px', borderRadius:'999px', padding:'1px 5px', boxShadow:'0 0 0 2px var(--color-surface)' }}>
+                    {unread > 9 ? '9+' : unread}
+                  </span>
+                )}
+              </Link>
+            </>
+          )}
+          {user?.role === 'admin' && (
+            <>
+              <Link to="/admin">{t('nav.admin')}</Link>
+              <Link className={active('/notifications')} to="/notifications" style={{ position:'relative' }} title="Notifications">
+                <span style={{ display:'inline-flex', alignItems:'center', gap:'.3rem' }}>
+                  <span aria-hidden>🔔</span>
+                  <span className="visually-hidden">Notifications</span>
+                </span>
+                {unread > 0 && (
+                  <span style={{ position:'absolute', top:'-4px', right:'-8px', background:'#ef4444', color:'#fff', fontWeight:700, fontSize:'10px', borderRadius:'999px', padding:'1px 5px', boxShadow:'0 0 0 2px var(--color-surface)' }}>
+                    {unread > 9 ? '9+' : unread}
+                  </span>
+                )}
+              </Link>
+            </>
+          )}
         </div>
         <div className="nav-spacer" />
         <div className="nav-links" style={{ gap: '1rem', alignItems:'center' }}>
@@ -240,6 +307,7 @@ export default function App() {
           <Route path="/post-job" element={<Protected roles={['employer']}><PostJob /></Protected>} />
           <Route path="/profile" element={<Protected roles={['teacher','employer']}><Profile /></Protected>} />
           <Route path="/alerts" element={<Protected roles={['teacher']}><JobAlerts /></Protected>} />
+          <Route path="/notifications" element={<Protected roles={['teacher','employer','admin']}><Notifications /></Protected>} />
           <Route path="/dashboard/teacher" element={<Protected roles={['teacher']}><DashboardTeacher /></Protected>} />
           <Route path="/dashboard/employer" element={<Protected roles={['employer']}><DashboardEmployer /></Protected>} />
           <Route path="/admin" element={<Protected roles={['admin']}><Admin /></Protected>} />

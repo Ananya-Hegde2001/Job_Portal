@@ -128,6 +128,10 @@ class Api {
   postApplicationMessage(appId, body){ return this.post(`/applications/${appId}/messages`, { body }); }
   postApplicationNote(appId, note){ return this.post(`/applications/${appId}/notes`, { note }); }
 
+  // Notifications
+  listNotifications(){ return this.get('/notifications'); }
+  markNotificationRead(id){ return this.post(`/notifications/${id}/read`, {}); }
+
   // AI Chat
   aiChat(prompt, reset=false){
     // Use longer timeout for model inference
