@@ -94,6 +94,20 @@ class Api {
     if (!res.ok) throw new Error('Download failed');
     return await res.blob();
   }
+  // Payments
+  createOrder(amountPaise, metadata = {}) {
+    return this.request('/payments/order', {
+      method: 'POST',
+      body: JSON.stringify({ amount: amountPaise, currency: 'INR', receipt: metadata.receipt || undefined })
+    });
+  }
+
+  verifyPayment(payload) {
+    return this.request('/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  }
 
   // Submit feedback/support message
   submitFeedback(email, message){

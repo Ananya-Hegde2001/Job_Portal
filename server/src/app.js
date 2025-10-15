@@ -15,6 +15,7 @@ import feedbackRouter from './routes/feedback.js';
 import savedRouter from './routes/saved.js';
 import timelineRouter from './routes/timeline.js';
 import aiRouter from './routes/ai.js';
+import paymentsRouter from './routes/payments.js';
 dotenv.config();
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/feedback', feedbackRouter);
 app.use('/api/saved', savedRouter);
 app.use('/api', timelineRouter);
 app.use('/api', aiRouter);
+app.use('/api/payments', paymentsRouter);
 
 app.use((err, req, res, next) => { // eslint-disable-line
   console.error(err);

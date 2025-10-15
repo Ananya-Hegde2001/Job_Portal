@@ -3,6 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from '../components/ui/Modal.jsx';
 import { showToast } from '../util/toast.js';
+import { api } from '../util/api.js';
 
 export default function Home(){
   const { t } = useTranslation();
@@ -91,6 +92,7 @@ export default function Home(){
   const [upgradeOpen,setUpgradeOpen] = React.useState(false);
   const [selectedPlan,setSelectedPlan] = React.useState('pro');
   const [billingCycle,setBillingCycle] = React.useState('monthly'); // monthly | yearly | lifetime
+  const [checkingOut, setCheckingOut] = React.useState(false);
 
   const billingOptions = [
     { id:'monthly', label:'Monthly', note:'Billed monthly • Cancel anytime', price:999, suffix:'/mo' },
@@ -113,10 +115,64 @@ export default function Home(){
     'Priority support SLA'
   ];
 
-  function handleUpgrade(){
+  async function loadRazorpay(){
+    if (window.Razorpay) return true;
+    return new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      s.onload = () => resolve(true);
+      s.onerror = () => resolve(false);
+      document.body.appendChild(s);
+    });
+  }
+
+  async function handleUpgrade(){
     if(!selectedPlan){ showToast('Select a plan first','error'); return; }
-    showToast(`Upgraded to ${selectedPlan.toUpperCase()} plan (${billingCycle})`,'success');
-    setUpgradeOpen(false);
+    setCheckingOut(true);
+    try{
+      const chosen = billingOptions.find(b=>b.id===billingCycle);
+      if(!chosen){ throw new Error('Invalid billing option'); }
+      const ok = await loadRazorpay();
+      if(!ok){ showToast('Failed to load Razorpay','error'); return; }
+      const amountPaise = (chosen.price) * 100; // INR -> paise
+      const { order, key } = await api.createOrder(amountPaise, { receipt: `plan_${selectedPlan}_${billingCycle}_${Date.now()}` });
+      const options = {
+        key,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Teacher Job Portal',
+        description: `${selectedPlan.toUpperCase()} • ${billingCycle}`,
+        order_id: order.id,
+        handler: async function (response){
+          try{
+            const verify = await api.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+            if (verify.ok){
+              showToast('Payment successful! Plan activated.','success');
+              setUpgradeOpen(false);
+            } else {
+              showToast('Payment verification failed.','error');
+            }
+          }catch(e){
+            showToast('Verification error: '+(e?.message||'error'),'error');
+          }
+        },
+        prefill: {},
+        theme: { color: '#2563eb' }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (resp){
+        showToast(resp?.error?.description || 'Payment failed','error');
+      });
+      rzp.open();
+    } catch(e){
+      showToast(e?.message || 'Checkout error','error');
+    } finally{
+      setCheckingOut(false);
+    }
   }
 
   function Marquee({ items, param, reverse=false, speed=25 }) {
@@ -347,7 +403,8 @@ export default function Home(){
           </label>
         ))}
       </div>
-      <p style={{fontSize:'.6rem',margin:'0',color:'var(--color-text-dim)'}}>Upgrade flow is simulated. Integrate real payments (Stripe/Razorpay) later.</p>
+      <p style={{fontSize:'.6rem',margin:'0',color:'var(--color-text-dim)'}}>Payments powered by Razorpay Test Mode. Use test cards or UPI. </p>
+      {checkingOut && <p className="muted" style={{margin:0}}>Processing checkout…</p>}
     </div>
   </Modal>
     </div>
