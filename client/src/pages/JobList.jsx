@@ -3,6 +3,7 @@ import { api } from '../util/api.js';
 import JobCard from '../components/JobCard.jsx';
 import JobFilters from '../components/JobFilters.jsx';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Modal from '../components/ui/Modal.jsx';
 
 export default function JobList() {
   const [jobs, setJobs] = useState([]);
@@ -13,6 +14,9 @@ export default function JobList() {
   const navigate = useNavigate();
   const [quickQ, setQuickQ] = useState('');
   const [quickCity, setQuickCity] = useState('');
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertSubject, setAlertSubject] = useState('');
+  const [alertLocation, setAlertLocation] = useState('');
 
   function buildParams(f = {}) {
     const params = new URLSearchParams();
@@ -49,6 +53,8 @@ export default function JobList() {
       setFilters(initFilters);
       setQuickQ(qParams.q||'');
       setQuickCity(qParams.city||'');
+      setAlertSubject(qParams.subject||'');
+      setAlertLocation(qParams.city || qParams.location || '');
       load(initFilters);
     } else {
       load(filters);
@@ -58,6 +64,17 @@ export default function JobList() {
   function onFilter(f){ setFilters(f); const params = buildParams(f); navigate('/jobs'+(params.toString()?`?${params}`:''), { replace:true }); load(f); }
 
   function runQuickSearch(e){ e.preventDefault(); const next = { ...filters, q: quickQ, city: quickCity }; setFilters(next); onFilter(next); }
+
+  async function createAlert(){
+    try{
+      if (!alertSubject && !alertLocation){ throw new Error('Provide subject or location'); }
+      await api.createAlert(alertSubject, alertLocation);
+      setAlertOpen(false);
+      alert('Alert created! You will see notifications for matching jobs.');
+    } catch(e){
+      alert(e?.message || 'Failed to create alert');
+    }
+  }
 
   const activeChips = useMemo(()=>{
     const map = { subject:'Subject', grade:'Grade', city:'City', location:'Region', organization_type:'Org', employment_type:'Type', min_experience:'MaxExp', mode:'Mode', active:'Active' };
@@ -78,6 +95,9 @@ export default function JobList() {
             <input value={quickCity} onChange={e=>setQuickCity(e.target.value)} placeholder='City or remote' />
             <button className='btn btn-sm'>Search</button>
           </form>
+          <div style={{display:'flex',justifyContent:'flex-end'}}>
+            <button className="btn btn-sm" type="button" onClick={()=>setAlertOpen(true)}>Create alert from this search</button>
+          </div>
           {activeChips.length>0 && (
             <div className="jobs-chips">
               {activeChips.map(c => (
@@ -98,6 +118,25 @@ export default function JobList() {
           {jobs.map(j => <JobCard key={j.id} job={j} />)}
         </div>
       </div>
+      <Modal
+        open={alertOpen}
+        onClose={()=>setAlertOpen(false)}
+        onSubmit={createAlert}
+        title="Create Job Alert"
+        primaryLabel="Create Alert"
+        secondaryLabel="Cancel"
+        width={520}
+      >
+        <label>
+          Subject (optional)
+          <input value={alertSubject} onChange={e=>setAlertSubject(e.target.value)} placeholder="e.g., Math, Computer Science" />
+        </label>
+        <label>
+          Location (optional)
+          <input value={alertLocation} onChange={e=>setAlertLocation(e.target.value)} placeholder="e.g., Bengaluru, Remote" />
+        </label>
+        <p className="muted" style={{margin:0,fontSize:'.72rem'}}>Provide at least one of Subject or Location.</p>
+      </Modal>
     </div>
   );
 }

@@ -19,6 +19,7 @@ import JobList from './pages/JobList.jsx';
 import JobDetail from './pages/JobDetail.jsx';
 import PostJob from './pages/PostJob.jsx';
 import Profile from './pages/Profile.jsx';
+import JobAlerts from './pages/JobAlerts.jsx';
 import { useAuth } from './state/AuthContext.jsx';
 import LanguageSelect from './components/LanguageSelect.jsx';
 import FloatingFeedback from './components/FloatingFeedback.jsx';
@@ -102,6 +103,7 @@ function Nav() {
             {t('nav.aiChat')}
             {!user && <span style={{marginLeft:4,fontSize:'10px',opacity:.6}}>🔒</span>}
           </Link>
+          {user?.role === 'teacher' && <Link className={active('/alerts')} to="/alerts">Alerts</Link>}
           {user?.role === 'teacher' && <Link to="/dashboard/teacher">{t('nav.teacherDash')}</Link>}
           {user?.role === 'employer' && <Link to="/dashboard/employer">{t('nav.employerDash')}</Link>}
           {user?.role === 'admin' && <Link to="/admin">{t('nav.admin')}</Link>}
@@ -237,6 +239,7 @@ export default function App() {
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/post-job" element={<Protected roles={['employer']}><PostJob /></Protected>} />
           <Route path="/profile" element={<Protected roles={['teacher','employer']}><Profile /></Protected>} />
+          <Route path="/alerts" element={<Protected roles={['teacher']}><JobAlerts /></Protected>} />
           <Route path="/dashboard/teacher" element={<Protected roles={['teacher']}><DashboardTeacher /></Protected>} />
           <Route path="/dashboard/employer" element={<Protected roles={['employer']}><DashboardEmployer /></Protected>} />
           <Route path="/admin" element={<Protected roles={['admin']}><Admin /></Protected>} />
