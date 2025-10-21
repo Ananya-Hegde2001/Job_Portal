@@ -1,0 +1,182 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Times New Roman;}{\f2 Courier New;}}
+{\colortbl;\red0\green0\blue0;\red37\green99\blue235;\red90\green90\blue90;}
+\paperw11907\paperh16840\margl1440\margr1440\margt1440\margb1440
+\fs22\f0\cf1
+
+\pard\qc\sa300\fs44\b TEACHER JOB PORTAL\b0\par
+\pard\qc\sa180\fs24 A Full-Stack Recruitment Platform for Educators and Institutions\par
+\pard\qc\sa240\fs20 Version: 1.0 \emdash October 2025\par
+\pard\qc\sa240\fs20 Repository: Job_Portal (React + Express + SQLite)\par
+\pard\qc\sa360 Author: Ananya Hegde \par
+\pard\qc\sa360\fs18 Email: admin@portal.local (dev)\par
+\pard\qc\sa360\fs18 \par
+\pard\qc\sa200 \b\fs28 PROJECT REPORT\b0\fs22\par
+\pard\qc\sa200 \fs18 (Word-compatible RTF document)\par
+\pard\sa200\fs18 \par
+\page
+
+\pard\sa300\fs28\b Abstract\b0\fs22\par
+\pard\sa200
+The Teacher Job Portal is a modern, responsive, and role-driven hiring platform designed to connect educators with institutions in an efficient and transparent way. Built with a React (Vite) frontend and a Node.js/Express backend using SQLite (with a clear path to PostgreSQL in production), the system supports teacher and employer workflows end-to-end: job discovery, advanced filtering, saved jobs, job alerts, profile management, application submission and tracking, notifications, and administrative moderation.\par
+\par
+This report documents the system's motivation and goals, related work, problem analysis, design and architectural decisions, implementation details, evaluation strategy and results, and a practical roadmap for enhancements including enterprise-grade deployment, analytics, and AI-assisted matching.\par
+\par
+Keywords: teacher recruitment, job marketplace, React, Express, SQLite, i18n, notifications, Razorpay (test), AI chat, full-stack web application.\par
+\page
+
+\pard\sa300\fs28\b Acknowledgments\b0\fs22\par
+\pard\sa200
+This project stands on the shoulders of the open-source ecosystem: React, Vite, Express, better-sqlite3, and their communities. Special thanks to early testers who provided feedback on usability and accessibility. Gratitude to mentors and peers who reviewed the architecture and recommended practical improvements for deployment and data migration.\par
+\par
+We also acknowledge the maintainers of localization libraries and the contributors of UI/UX resources that inspired the responsive design and theme system.\par
+\page
+
+\pard\sa300\fs28\b Table of Contents\b0\fs22\par
+\pard\sa200
+1. Introduction .......................................................... 4\par
+2. Literature Review ..................................................... 8\par
+3. System Analysis / Problem Definition .................................. 11\par
+4. Design and Methodology ................................................ 14\par
+5. Implementation Details ................................................ 18\par
+6. Results and Evaluation ................................................ 28\par
+7. Conclusion and Future Work ............................................ 32\par
+8. References ............................................................ 34\par
+9. Appendices (Code Snapshots, Screenshots) .............................. 36\par
+\page
+
+\pard\sa300\fs28\b 1. Introduction\b0\fs22\par
+\pard\sa200
+Education hiring is fragmented across portals, institutional websites, and social platforms. Teachers struggle to discover roles aligned with subject expertise, grade levels, or preferred locations, while employers lack structured tools to filter candidates and track application lifecycles. The Teacher Job Portal addresses these gaps by offering:\par
+\pard\li360\sa120\fi-360\tx360\tx720\tx1080
+\bullet A unified marketplace for academic roles with structured metadata.\par
+\bullet Advanced discovery (subject, grade, location, remote/onsite, experience).\par
+\bullet Role-based workflows: teacher, employer, and admin.\par
+\bullet Application submission with cover letters and status tracking.\par
+\bullet Saved jobs and job alerts for personalized updates.\par
+\bullet Notifications and multilingual UI for inclusivity and engagement.\par
+\pard\sa200
+The platform emphasizes maintainability and extensibility: clear JSON contracts, modular routers, and a migration path from SQLite to PostgreSQL. It supports modern UX expectations: dark/light themes, responsive layouts, and accessible components.\par
+\par
+\b 1.1 Objectives\b0\par
+\pard\li360\sa120\fi-360\tx360\tx720\tx1080
+\bullet Enable teachers to find, save, and apply to relevant roles quickly.\par
+\bullet Provide employers a streamlined way to post jobs and manage applicants.\par
+\bullet Offer administrators moderation tools and platform oversight.\par
+\bullet Support internationalization and inclusive design.\par
+\bullet Prepare for AI-assisted matching and analytics.\par
+\pard\sa200
+\b 1.2 Scope\b0\par
+The MVP covers authentication, job CRUD, search/filters, applications, saved jobs, alerts, notifications, profiles, and a test-mode payments flow. Future scope includes richer analytics, messaging, resume parsing, and production-grade deployment guidance.\par
+\page
+
+\pard\sa300\fs28\b 2. Literature Review\b0\fs22\par
+\pard\sa200
+Existing job portals demonstrate scalable discovery and notification models, but often lack domain-specific structures needed for academia. Research on recruitment platforms suggests that:\par
+\pard\li360\sa120\fi-360\tx360\tx720\tx1080
+\bullet Structured metadata improves match accuracy (subject, grade, institution type).\par
+\bullet Timely notifications and alerts increase engagement and application completion rates.\par
+\bullet Mobile-first design expands reach in regions with limited desktop access.\par
+\pard\sa200
+Academic recruitment further benefits from transparent application status workflows and the capture of teaching credentials and certifications. The project synthesizes these insights into a targeted, pragmatic solution.\par
+\page
+
+\pard\sa300\fs28\b 3. System Analysis / Problem Definition\b0\fs22\par
+\pard\sa200
+\b 3.1 Stakeholders\b0\par
+Teachers, employers (schools, colleges, universities), and administrators. Each stakeholder requires tailored capabilities and access controls.\par
+\b 3.2 Functional Requirements\b0\par
+Auth (JWT), role-based access, job CRUD, search & filters, applications, saved jobs, alerts, notifications, profiles, and admin moderation.\par
+\b 3.3 Non-Functional Requirements\b0\par
+Performance, usability, responsiveness, i18n, and a clear path to production scalability (DB migration, object storage, caching, and CI/CD).\par
+\page
+
+\pard\sa300\fs28\b 4. Design and Methodology\b0\fs22\par
+\pard\sa200
+\b 4.1 Architecture\b0\par
+React SPA (Vite) communicates with an Express API backed by better-sqlite3. The client auto-discovers the API base via a /health endpoint or \cf2 VITE_API_URL\cf1.\par
+\b 4.2 Data Model\b0\par
+Core tables include users, teacher_profiles, employer_profiles, jobs, applications, application_events, saved_jobs, job_alert_subscriptions, and notifications.\par
+\b 4.3 Security\b0\par
+Password hashing (bcrypt), role-guarded routes, and token-based auth. Future: rate limiting, refresh rotation, CSP, and audit logging.\par
+\b 4.4 Internationalization\b0\par
+Language bundles (en, hi, kn, ta, te, ml, bn, gu, mr, pa, or, ur) with dir/lang updates for RTL.\par
+\b 4.5 Payments (Test)\b0\par
+Razorpay order creation + signature verification endpoints and a client checkout flow on Home/pricing.\par
+\page
+
+\pard\sa300\fs28\b 5. Implementation Details\b0\fs22\par
+\pard\sa200
+\b 5.1 Frontend\b0\par
+React 18 + Vite, React Router 6, Context-based Auth, custom CSS with design tokens, responsive utilities, reusable components (Modal, JobCard, Filters). Key pages: Home, Jobs, Job Detail, Profile, Job Alerts, Notifications, Dashboards, AI Chat.\par
+\b 5.2 Backend\b0\par
+Express 4 routes: auth, jobs, applications, profiles, saved (jobs/alerts), notifications, ai (chat/stream), payments, admin. Database via better-sqlite3 with init/migrate scripts and seeders.\par
+\b 5.3 Notable Endpoints\b0\par
+Auth: /auth/register, /auth/login, /auth/me. Jobs: /jobs, /jobs/:id. Applications: /applications, /applications/mine, /applications/:id/status. Profiles: /profiles/teacher, /profiles/employer. Saved: /saved/jobs (toggle). Alerts: /saved/alerts (GET/POST/DELETE). Notifications: /notifications (+ mark read). AI: /ai/chat (+ stream). Payments: /payments/order, /payments/verify.\par
+\b 5.4 Job Alerts UX\b0\par
+“Create alert from this search” on Jobs (login required) opens a modal pre-filled from filters; teachers can manage alerts under /alerts.\par
+\b 5.5 Notifications Center\b0\par
+Navbar bell with unread badge placed near dashboard links (role-aware). The /notifications page groups by date, supports unread-only filter, and allows per-item or bulk mark-as-read.\par
+\b 5.6 AI Chat\b0\par
+Protected route; streaming responses via SSE.\par
+\b 5.7 Payments\b0\par
+Test-mode Razorpay checkout integrated in Home’s pricing; server verifies signature and returns result.\par
+\page
+
+\pard\sa300\fs28\b 6. Results and Evaluation\b0\fs22\par
+\pard\sa200
+A local evaluation with seeded data confirms end-to-end flows: account login, job search, save/unsave, alerts create/delete, apply with cover letter, application status updates (simulated), notifications consumption, and Razorpay test checkout. Performance in dev is responsive with sub-second navigations on commodity hardware.\par
+\par
+UX validation indicates the responsive grid and collapsible filters improve small-screen usability. The notifications grouping and unread filtering reduce cognitive load for returning users.\par
+\page
+
+\pard\sa300\fs28\b 7. Conclusion and Future Work\b0\fs22\par
+\pard\sa200
+The Teacher Job Portal delivers a cohesive baseline for academic recruitment, combining structured discovery with role-based workflows and modern UX. The architecture supports iterative enhancements without disruptive rewrites.\par
+\par
+Future work includes:\par
+\pard\li360\sa120\fi-360\tx360\tx720\tx1080
+\bullet Migration to PostgreSQL and containerized deployments.\par
+\bullet Resume parsing, richer profiles, and candidate recommendations.\par
+\bullet Real-time messaging between teachers and employers.\par
+\bullet Analytics dashboards and notification preferences.\par
+\bullet Stronger security posture (rate limits, refresh rotation, CSP, SSO options).\par
+\page
+
+\pard\sa300\fs28\b 8. References\b0\fs22\par
+\pard\sa200
+[1] React, Vite, Express, better-sqlite3 official documentation.\par
+[2] Razorpay Docs (Test Mode Integration).\par
+[3] W3C Accessibility Guidelines (WCAG) 2.x.\par
+[4] Internationalization design patterns and i18n library docs.\par
+\page
+
+\pard\sa300\fs28\b 9. Appendices (Code Snapshots, Screenshots)\b0\fs22\par
+\pard\sa200
+\b A.1 Repository Structure\b0\par
+\pard\li360\sa120\fi-360\tx360\tx720\tx1080
+client/src/pages/Jobs.jsx \tab Job List page with filters and alert dialog.\par
+client/src/pages/JobAlerts.jsx \tab Alerts management page.\par
+client/src/pages/Notifications.jsx \tab Grouped notifications UI.\par
+server/src/routes/saved.js \tab Saved jobs + alerts routes.\par
+server/src/routes/notifications.js \tab Notifications list + mark read.\par
+\pard\sa200
+\b A.2 Screenshots (Placeholders)\b0\par
+Insert screenshots of: Home, Jobs with filters, Job Detail, Alerts, Notifications, and Dashboards.\par
+\par
+\b A.3 Run Commands (Windows PowerShell)\b0\par
+\pard\li360\sa120\fi-360\tx360\tx720\tx1080
+Backend: \cf2 cd server; npm run init:db; npm run seed:jobs; npm run dev\cf1\par
+Frontend: \cf2 cd client; npm run dev\cf1\par
+\par
+\b A.4 Dev Accounts\b0\par
+Admin: admin@portal.local / admin123\par
+Teachers: employee1@gmail.com / password123; employee2@gmail.com / password123; rithikashetty@gmail.com / Rithika123\par
+Employers: school1@gmail.com / password123; school2@gmail.com / password123\par
+\par
+\b A.5 Environment Variables\b0\par
+Server: PORT, JWT_SECRET, DB_FILE, GEMINI_API_KEY, GEMINI_MODEL, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET\par
+Client: VITE_API_URL (optional)\par
+\par
+\pard\sa200\fs18 End of Report.\par
+}
