@@ -2,113 +2,110 @@
 
 # 🧑‍🏫 Teacher Job Portal
 
-Find the right teaching job. Help institutions hire faster.
+A modern portal that connects educators with institutions in a simple, friendly way.
 
-— Clean, responsive, multi‑language job portal for Teachers, Employers, and Admins —
+— Find jobs. Save favorites. Create alerts. Apply and track progress. —
+
+---
+
+[What it does](#-what-it-does) · [Features](#-features) · [Pages](#-pages) · [For Teachers](#-for-teachers) · [For Employers](#-for-employers) · [How to run](#-how-to-run) · [Demo logins](#-demo-logins) · [Languages](#-languages) · [Payments](#-payments) · [Roadmap](#-roadmap)
 
 </div>
 
-## What this project includes
+## 🎯 What it does
+Teacher Job Portal is a single place to discover academic opportunities and manage the hiring journey. Teachers can search and filter roles, save jobs, set alerts, and apply with a short cover note. Employers can post openings and review applications. Everyone gets a clean, responsive experience with helpful notifications.
 
-All the core pieces you need to run a modern education job portal:
+## ✨ Features
+- Secure sign in with roles: Teacher, Employer, Admin
+- Powerful job search: keywords, subject, grade, city/region, remote/onsite, experience, employment type
+- Job details at a glance: tags, salary/payscale (when available), requirements, benefits
+- Save jobs (Teacher)
+- Job Alerts (Teacher):
+  - “Create alert from this search” on the Jobs page (login required)
+  - Manage alerts on the Alerts page
+- Apply with a short cover letter (Teacher)
+- Application status updates (submitted, shortlisted, hired/rejected)
+- Notifications Center:
+  - Bell icon with unread badge
+  - Dedicated page to view, filter (unread), and mark as read
+- Profiles:
+  - Teacher: subjects, grades, experience, skills, location, bio
+  - Employer: basic organization profile
+- Dashboards: quick access for Teacher and Employer
+- Multilingual UI (multiple Indian languages supported)
+- Light/Dark theme toggle and mobile‑friendly layouts
+- Help Center & About pages on the public home
+- AI Chat (protected): a helpful assistant page
+- Payments (test): Razorpay checkout on pricing (Home)
 
-- Accounts and roles
-  - Teacher, Employer, Admin logins (with sample dev accounts)
-  - Secure session handling (JWT under the hood)
+## 🗺 Pages
+- Home: quick search, featured sections, pricing with test checkout
+- Jobs (/jobs): filters + “Create alert from this search”
+- Job Detail (/jobs/:id): full description, tags, save/apply
+- Alerts (/alerts): view/remove saved job alerts (Teacher)
+- Notifications (/notifications): grouped by date, unread filter, mark as read
+- Profile (/profile): manage teacher or employer profile
+- Dashboards: teacher and employer quick access
+- AI Chat (/ai-chat): protected assistant
+- Institutions, Salary Guide, Help Center, About (public info pages)
 
-- Jobs and discovery
-  - Browse all open roles with fast keyword search
-  - Powerful filters: subject, grade level, city/region, organization type, employment type, mode (remote/on‑site), experience
-  - Rich job details: salary/pay scale, requirements, responsibilities, benefits, deadlines
+## 👩‍🏫 For Teachers
+- Search, filter, and browse relevant roles
+- Save jobs you like
+- Create job alerts from your current search
+- Apply with a short cover letter
+- Track updates in Notifications
+- Build a basic profile (subjects, grades, skills, experience)
 
-- Teacher experience
-  - Save/Unsave jobs for later
-  - Create Job Alerts from your current search (e.g., “Math in Bengaluru”) and manage them on the Alerts page
-  - Apply with a short cover letter; see your past applications
-  - Profile page: subjects, grades, skills, experience, location, bio, LinkedIn/resume link, avatar/resume upload support
+## 🏫 For Employers
+- Post jobs with structured details (title, subject, grade, location, type)
+- Review applications for your jobs
+- Manage your organization profile
 
-- Employer experience
-  - Post new jobs and manage applications for your roles
-  - Employer profile: company info, logo, website, industry, location
+## ⚙️ How to run (Windows PowerShell)
+Prerequisite: Node.js 18+
 
-- Notifications (in‑app)
-  - See updates like “Application submitted” or status changes (shortlisted/rejected/hired)
-  - Unread badge in the navbar, grouped by date, quick “mark read”
-
-- Helpful extras
-  - AI Chat Assistant (protected) to help with quick questions
-  - Pricing section on Home with Razorpay (test mode) checkout flow
-  - Institutions page, Salary Guide + Salary Detail pages
-  - Help Center and About (shown for visitors on the homepage)
-  - Floating Feedback button and toasts for quick messages
-  - Mobile‑responsive design + Light/Dark theme toggle
-  - Multi‑language UI (English + popular Indian languages)
-
-## Quick start (Windows)
-
-1) Start the API
+Backend (API)
 ```powershell
 cd server
 copy .env.example .env
 npm install
 npm run init:db
 npm run seed:jobs
-npm run dev   # API: http://localhost:4000
+npm run dev   # runs at http://localhost:4000
 ```
 
-2) Start the frontend
+Frontend (Web)
 ```powershell
 cd ../client
 npm install
-npm run dev   # Web: http://localhost:5173
+npm run dev   # runs at http://localhost:5173
 ```
 
-3) Sign in with sample accounts
+## 🔐 Demo logins
 - Admin:    admin@portal.local / admin123
 - Teachers: employee1@gmail.com / password123
             employee2@gmail.com / password123
+            rithikashetty@gmail.com / Rithika123
 - Employers: school1@gmail.com / password123
              school2@gmail.com / password123
 
-Tip: The development database file is at `server/data/jobportal.db`.
+## 🌍 Languages
+English plus multiple Indian languages (e.g., Hindi, Kannada, Tamil, Telugu, Malayalam, Bengali, Gujarati, Marathi, Punjabi, Odia, Urdu). Language choice is remembered, and RTL is handled where applicable.
 
-## Main pages and where to find them
+## 💳 Payments
+Razorpay is integrated in test mode for the pricing section on Home. It creates an order on the server and verifies the payment signature.
 
-- Home: search bar, featured sections, pricing (test checkout)
-- Jobs (/jobs): filters, results, “Create alert from this search” (teachers log in to create)
-- Job Detail (/jobs/:id): full description, tags, Save/Apply
-- Job Alerts (/alerts): list and delete saved search alerts (teacher)
-- Notifications (/notifications): updates about your activity (grouped by Today/Yesterday/This Week)
-- Profile (/profile): teacher or employer profile
-- Teacher Dashboard (/dashboard/teacher) and Employer Dashboard (/dashboard/employer)
-- AI Chat (/ai-chat): assistant (only for signed‑in users)
+## 🧭 Roadmap (high‑level)
+- Enhanced employer analytics
+- Resume uploads and richer teacher profiles
+- Real‑time messaging between teachers and employers
+- Postgres migration for larger deployments
+- Notification preferences and email digests
+- More public pages and guides
 
-## Languages available (i18n)
+---
 
-English (en), Hindi (hi), Kannada (kn), Tamil (ta), Telugu (te), Malayalam (ml), Bengali (bn), Gujarati (gu), Marathi (mr), Punjabi (pa), Odia (or), Urdu (ur)
-
-The app remembers your choice and switches layout direction when needed (e.g., Urdu).
-
-## Payments (test mode)
-
-- A demo checkout is available in the pricing section on the Home page
-- Uses Razorpay test keys on the server; the server validates payment signatures
-- This is for demonstration only (no real charges)
-
-## Notes for running locally
-
-- If the frontend can’t reach the API, it will try to auto‑discover it on http://localhost:4000/api via a health check
-- You can set a specific API base with `client/.env`: `VITE_API_URL=http://localhost:4000/api`
-- Use the provided seed accounts to explore all flows
-
-## Project layout (at a glance)
-
-```
-client/  → React app (components, pages, state, util, locales)
-server/  → Express API (routes for auth, jobs, applications, profiles, saved, alerts, notifications, ai, payments)
-docs/    → Documentation (report/notes)
-```
-
-— That’s it! You now have a complete teacher job portal with search, alerts, notifications, profiles, applications, and a clean responsive UI. If you’d like a live deployment guide (Vercel + Render) or screenshots in this README, I can add those next.
+Need help getting it running or want a specific page/screenshots added here? Open an issue or ask in the repo. 👋
 
 
