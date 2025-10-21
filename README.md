@@ -72,7 +72,6 @@ npm run dev    # http://localhost:5173
 - Admin:    admin@portal.local / admin123
 - Teachers: employee1@gmail.com / password123
             employee2@gmail.com / password123
-            rithikashetty@gmail.com / Rithika123
 - Employers: school1@gmail.com / password123
              school2@gmail.com / password123
 
