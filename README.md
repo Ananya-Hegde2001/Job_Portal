@@ -2,242 +2,187 @@
 
 # 🧑‍🏫 Teacher Job Portal
 
-Full‑stack recruitment & talent management platform connecting educators with institutions.
+Full‑stack platform connecting educators with institutions.
 
-**Status:** Active Development • **Frontend:** React (Vite) • **Backend:** Node.js (Express) • **DB:** SQLite → PostgreSQL (planned)
+Frontend: React (Vite) · Backend: Node.js (Express) · DB: SQLite (dev) · i18n · Razorpay (test)
 
 ---
 
-[Features](#-features) · [Architecture](#-architecture-overview) · [Getting Started](#-getting-started) · [API](#-api-overview) · [Database](#-database-schema) · [Roadmap](#-roadmap) · [Contributing](#-contributing)
+[Features](#-features) · [Architecture](#-architecture) · [Quick Start](#-quick-start) · [Env](#-environment-variables) · [Pages](#-key-pages) · [API](#-api-overview) · [i18n](#-internationalization) · [Deploy](#-deployment-notes)
 
 </div>
 
-## ✨ Project Overview
-The Teacher Job Portal centralizes educator hiring. Institutions can publish structured job vacancies while teachers maintain rich professional profiles and track application lifecycles. The system emphasizes transparency, performance, multilingual readiness (Indian languages), and an extensible architecture ready for future AI‑assisted matching and workflow automation.
+## ✨ Overview
+Employers post structured jobs; teachers build profiles, search/filter roles, save jobs, create job alerts, apply with cover letters, and track application status. The app includes notifications, multilingual UI, and a responsive design.
 
-## ✅ Key Features
-- Role-based access: Teacher • Employer • Admin
-- Secure authentication (JWT) & profile management
-- Job posting lifecycle (draft → pending → approved → closed)
-- Advanced job search & filtering (subject, grade, location, keywords)
-- Application submission & status tracking
-- Saved jobs (planned) & notification system
-- Admin moderation (users + postings)
-- Internationalization framework (multi-language content groundwork)
-- Clean modular backend + React SPA frontend
-- Extensible for analytics, AI suggestions, and real-time messaging
+## ✅ Features
+- Auth & Roles: Teacher • Employer • Admin (JWT)
+- Advanced Job Search (subject, grade, location, employment type, mode, experience)
+- Job Detail with Save/Unsave and Apply (cover letter)
+- Saved Jobs (teacher)
+- Job Alerts: create from current search; manage under /alerts (teacher)
+- Notifications Center: unread badge, grouped by date, mark as read
+- Profiles: Teacher & Employer profile management
+- Payments (test): Razorpay order + verification wired to pricing on Home
+- AI Chat Assistant (protected): streaming responses under /ai-chat
+- Mobile‑responsive UI and theme toggle
 
-## 🗂 Monorepo Structure
+## 🗂 Structure
 ```
 Job_Portal/
-  client/           # React (Vite) SPA
+  client/
     src/
-      components/   # Reusable UI + domain components
-      pages/         # Route-level pages
-      state/         # Context / providers
-      util/          # Helpers (api, toast, email)
-      locales/       # i18n JSON translations
-  server/           # Express API
+      components/  pages/  state/  util/  locales/
+  server/
     src/
-      routes/       # auth, jobs, applications, profiles, admin, ai...
-      db/           # init, migrate, connection
-      scripts/      # maintenance + seeding tools
-    data/           # SQLite database file(s)
-  docs/             # Synopsis & supporting docs
+      routes/ db/ scripts/
+    data/
   README.md
-  package.json      # Root convenience (optional tooling)
+  docs/
 ```
 
-## 🧱 Architecture Overview
+## 🧱 Architecture
 ```
-┌──────────┐     HTTP/JSON     ┌─────────────┐        ┌──────────────┐
-│  Client  │ ─────────────────▶│  Express API│────────▶│   Database    │
-│ React    │◀───────────────── │  (services) │        │ (SQLite→PG)  │
-└────┬─────┘      Web Assets   └──────┬──────┘        └─────┬────────┘
-     │                                │  Notifications        │
-     │                                ▼                       │
-     │                         ┌────────────┐                │
-     │                         │ Future MQ  │ (Rabbit/SQS)    │
-     │                                │                      │
-     ▼                                ▼                      ▼
- Frontend i18n                Email/SMS Adapter       Object Storage (CVs)
+React (Vite)  ⇄  Express API  ⇄  SQLite (better‑sqlite3)
+                     ├─ Razorpay (test)
+                     └─ AI Chat endpoints
 ```
 
-### Design Principles
-- Separation of concerns (routes → services → data access)
-- Predictable state & DTO shapes
-- Migration path to message queues & Postgres
-- Developer ergonomics (minimal boilerplate, readable scripts)
+## 🚀 Quick Start (Windows PowerShell)
+Prerequisites: Node.js ≥ 18
 
-## 🛠 Tech Stack
-| Layer        | Technology                              |
-|--------------|------------------------------------------|
-| Frontend     | React (Vite), Context API, CSS modules   |
-| Backend      | Node.js, Express, modular routers        |
-| Database     | SQLite (dev) → PostgreSQL (scale)        |
-| Auth         | JWT (access + refresh groundwork)        |
-| i18n         | JSON locale bundles + simple loader      |
-| Styling      | `styles.css` + CSS variables             |
-| Testing (plan)| Jest, Supertest, Cypress                |
-| Deployment (plan)| Docker, GitHub Actions CI            |
-
-## 🚀 Getting Started
-### Prerequisites
-- Node.js ≥ 18
-- npm (or pnpm/yarn if adapted)
-
-### 1. Clone
-```powershell
-git clone <repo-url>
-cd Job_Portal
-```
-
-### 2. Backend Setup
+1) Backend
 ```powershell
 cd server
+copy .env.example .env  # edit .env if needed
 npm install
-npm run init:db   # creates / migrates SQLite & seeds admin
-npm run dev       # starts API on http://localhost:4000
+npm run init:db
+npm run seed:jobs
+npm run dev   # http://localhost:4000
 ```
 
-### 3. Frontend Setup
+2) Frontend
 ```powershell
 cd ../client
 npm install
-npm run dev       # starts Vite dev server on http://localhost:5173
+npm run dev    # http://localhost:5173
 ```
 
-### 4. Login (Seed Data)
-- Admin: `admin@portal.local` / `admin123`
+3) Dev accounts
+- Admin:    admin@portal.local / admin123
+- Teachers: employee1@gmail.com / password123
+            employee2@gmail.com / password123
+            rithikashetty@gmail.com / Rithika123
+- Employers: school1@gmail.com / password123
+             school2@gmail.com / password123
 
-### 5. Environment Variables (`server/.env`)
+SQLite file location (dev): `server/data/jobportal.db`
+
+## 🔧 Environment Variables
+
+server/.env
 ```env
 PORT=4000
 JWT_SECRET=change_me_dev
 DB_FILE=./data/jobportal.db
-# Future additions:
-# EMAIL_SMTP_HOST=
-# EMAIL_SMTP_USER=
-# EMAIL_SMTP_PASS=
+
+# AI (optional)
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+
+# Razorpay (test)
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
 ```
 
-## 📡 API Overview
-Base URL: `http://localhost:4000/api`
-
-| Domain | Endpoint (subset) | Method | Notes |
-|--------|-------------------|--------|-------|
-| Auth   | /auth/register    | POST   | Register user (teacher/employer) |
-|        | /auth/login       | POST   | Issue JWT |
-|        | /auth/me          | GET    | Current user profile |
-| Jobs   | /jobs             | GET    | Public approved jobs (query filters) |
-|        | /jobs/:id         | GET    | Job details (approved) |
-|        | /jobs             | POST   | Employer creates (pending) |
-|        | /jobs/:id         | PUT    | Update / approve / close |
-| Apps   | /applications     | POST   | Teacher applies |
-|        | /applications/mine| GET    | Teacher’s applications |
-|        | /applications/job/:jobId | GET | Employer/admin view |
-|        | /applications/:id/status | PUT | Status transition |
-| Profiles | /profiles/me    | GET    | Own profile |
-|        | /profiles/teacher | POST   | Upsert teacher profile |
-|        | /profiles/employer| POST   | Upsert employer profile |
-| Notifications | /notifications | GET | User notifications |
-
-> For full payload shapes see route definitions in `server/src/routes/*`.
-
-## 🗄 Database Schema (Core Entities)
-```
-users(id, email, password_hash, role, created_at)
-teacher_profiles(user_id FK, subjects, experience_years, location, qualifications, bio)
-employer_profiles(user_id FK, org_name, address, contact_person)
-jobs(id, employer_id FK, title, description, subject_tags, grade_levels, location,
-     status, salary_min, salary_max, created_at, updated_at)
-applications(id, job_id FK, teacher_id FK, status, cover_letter, resume_path,
-             created_at, updated_at)
-notifications(id, user_id FK, type, payload_json, is_read, created_at)
+client/.env (optional)
+```env
+# If not set, the client auto-discovers http://localhost:4000/api via /health
+VITE_API_URL=http://localhost:4000/api
 ```
 
-### Status Lifecycle (Applications)
-`submitted → shortlisted → interview_scheduled (future) → offered → hired | rejected`
+## 🧭 Key Pages
+- Home: search, featured sections, pricing (Razorpay test checkout)
+- Jobs (/jobs): filters + “Create alert from this search” (login required)
+- Job Detail (/jobs/:id): details, tags, save, apply with cover letter
+- Job Alerts (/alerts): list/delete subscriptions (teacher)
+- Notifications (/notifications): unread filter, grouped by date, mark read
+- Dashboards: Teacher & Employer quick links
+- Profile (/profile): teacher/employer profiles
+- AI Chat (/ai-chat): protected assistant
+
+## 📡 API Overview (highlights)
+Base: `http://localhost:4000/api`
+
+Auth
+- POST /auth/register · POST /auth/login · GET /auth/me · PUT /auth/me
+
+Jobs
+- GET /jobs (filters: q, subject, grade, city/location, employment_type, mode, min_experience, active)
+- GET /jobs/:id · POST /jobs · PUT /jobs/:id (role‑guarded)
+
+Applications
+- POST /applications (teacher) · GET /applications/mine (teacher)
+- GET /applications/job/:jobId (employer/admin)
+- PUT /applications/:id/status (employer/admin)
+
+Profiles
+- GET /profiles/me
+- POST/PUT /profiles/teacher (teacher)
+- POST/PUT /profiles/employer (employer)
+
+Saved & Alerts
+- GET /saved/jobs · POST /saved/jobs/:jobId
+- GET /saved/alerts · POST /saved/alerts · DELETE /saved/alerts/:id
+
+Notifications
+- GET /notifications · POST /notifications/:id/read
+
+AI
+- POST /ai/chat · POST /ai/chat/stream
+
+Payments
+- POST /payments/order · POST /payments/verify
+
+Feedback
+- POST /feedback
+
+> See `server/src/routes/*.js` for full payloads and role guards.
+
+## 🗄 Database (core)
+```
+users(id, email, password_hash, role, name, phone, reset_token, reset_expires, created_at)
+teacher_profiles(user_id, subjects, grades, experience_years, skills, gender, work_status,
+                 linkedin_url, location, bio, top_skills_json, certificates_json,
+                 experience_json, education_json, resume_mime, resume_data, avatar_mime, avatar_data)
+employer_profiles(user_id, company_name, logo_url, industry, description, website, location)
+jobs(id, employer_id, title, description, subject, grade_level, city, organization_type,
+     employment_type, pay_scale, salary_min, salary_max, min_experience, status,
+     remote_allowed, application_deadline, benefits, responsibilities, requirements,
+     education_required, created_at, updated_at)
+applications(id, job_id, teacher_id, status, cover_letter, created_at, updated_at)
+application_events(id, application_id, type, detail, created_at)
+saved_jobs(user_id, job_id, created_at)
+job_alert_subscriptions(id, user_id, subject, location, created_at)
+notifications(id, user_id, type, message, is_read, created_at)
+```
 
 ## 🌐 Internationalization
-Locale JSON files reside in `client/src/locales/<lang>/translation.json`.
-- Add new language: copy `en` folder, translate values, update i18n loader (`i18n.js`).
-- Prefer short semantic keys over full sentence duplication.
+Languages bundled: en, hi, kn, ta, te, ml, bn, gu, mr, pa, or, ur
+- Translation files: `client/src/locales/<lang>/translation.json`
+- Loader: `client/src/i18n.js` (sets dir/lang and persists)
 
-## 🔔 Notifications
-Currently stored + retrievable via `/notifications` endpoint. Future enhancements:
-- Real-time delivery via WebSockets / SSE
-- Email templating
-- Digest batching & user preferences
+## 💳 Payments (test)
+- Server routes: `/payments/order` and `/payments/verify` (HMAC signature check)
+- Client invokes checkout with server key+order; use Razorpay test keys only
 
-## 🎨 Theming
-Centralized CSS variables in `client/src/styles.css`:
-```css
-:root { --primary:#2563eb; --bg:#0f1115; --panel:#1b1f27; --radius-sm:4px; }
-```
-Override variables for light mode or alternate palettes. Component classes consume tokens (avoid hard-coded colors).
+## 📱 UX
+- Responsive layout; filters collapse on small screens
+- Accessible controls on key flows; light/dark toggle in navbar
 
-## 🧪 Testing (Planned Structure)
-| Layer | Tool | Target |
-|-------|------|--------|
-| Unit  | Jest | Service & util functions |
-| API   | Supertest | Auth, jobs, applications |
-| E2E   | Cypress | Core user journeys |
-| Perf  | k6/JMeter | Job search & apply flows |
-| Sec   | Dependency audit | Known CVEs |
+## 🚢 Deployment Notes
+- Frontend: Vercel (static). Set `VITE_API_URL` to your API base.
+- Backend: Render/Railway/Fly. Use persistent disk for SQLite (e.g., `/var/data/jobportal.db`) and set `DB_FILE`.
+- CORS: Adjust allowed origins for production.
 
-## 🧰 Useful Scripts
-```powershell
-cd server; npm run init:db   # Initialize / migrate database & seed admin
-cd server; npm run dev       # Run API (watch mode)
-cd client; npm run dev       # Run frontend
-```
-
-## 🛡 Security & Hardening (Roadmap)
-- Password hashing (bcrypt) ✓
-- Input validation (introduce zod / joi) ⏳
-- Rate limiting & IP throttling ⏳
-- Audit logging expansion ⏳
-- JWT refresh rotation & revocation list ⏳
-- Content Security Policy (CSP) headers ⏳
-
-## 🗺 Roadmap
-**Near Term**: Password reset, profile enhancements, saved jobs UI, notification read UX.
-
-**Mid Term**: Advanced search filters (salary band, experience), resume uploads (S3), analytics dashboards, basic messaging.
-
-**Long Term**: AI-assisted job matching, scheduling integration, multi-tenant org groups, recommendation engine, real-time interviews integration.
-
-## 🤝 Contributing
-1. Fork & branch: `feat/<short-feature-name>`
-2. Keep commits atomic & conventional (e.g., `feat: add job filter by salary`)
-3. Ensure lint & (when implemented) tests pass
-4. Open PR with concise description + screenshots for UI changes
-
-### Architectural Guidelines
-- Keep route logic thin: delegate to service modules
-- Avoid implicit magic in middleware (be explicit about auth scopes)
-- Prefer composition over inheritance in React components
-
-## 📦 Deployment (Planned)
-| Stage | Approach |
-|-------|----------|
-| Build | CI (GitHub Actions) builds client + server |
-| Bundle | Docker multi-stage image |
-| Release | Container registry + orchestrator (Kubernetes / App Service) |
-| Migrate | Run migration script on startup (idempotent) |
-
-## 📝 License
-License **TBD**. If you intend to open source, consider MIT/Apache-2.0; add a `LICENSE` file accordingly.
-
-## 🙌 Acknowledgements
-- Open-source community (React, Express ecosystem)
-- Future contributors for localization & accessibility improvements
-
-## 📣 Feedback / Support
-Open an issue or propose a discussion thread. For security concerns, disclose responsibly (avoid public POC until patched).
-
----
-
-> This README is designed to scale with the project. Update sections as features graduate from roadmap to implementation.
 
