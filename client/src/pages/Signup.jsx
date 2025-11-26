@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../state/AuthContext.jsx';
 import AuthModal from '../components/AuthModal.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
+import { isValidEmail } from '../util/validateEmail.js';
 
 export default function Signup() {
   const { register } = useAuth();
@@ -16,6 +17,7 @@ export default function Signup() {
     e.preventDefault();
     setLoading(true); setError(null);
     const payload = { ...form, email: form.email.trim() };
+      if (!isValidEmail(payload.email)) { setLoading(false); setError('Please enter a valid email address.'); return; }
       if (!/^\d{10}$/.test(payload.phone || '')) { setLoading(false); setError('Invalid phone number'); return; }
       register(payload)
       .then(() => nav('/'))

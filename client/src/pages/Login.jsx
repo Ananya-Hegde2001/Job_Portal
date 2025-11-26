@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../state/AuthContext.jsx';
 import AuthModal from '../components/AuthModal.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
+import { isValidEmail } from '../util/validateEmail.js';
 
 export default function Login() {
   const { login } = useAuth();
@@ -17,8 +18,13 @@ export default function Login() {
   function onSubmit(e) {
     e.preventDefault();
     setError(null);
+    const email = form.email.trim();
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
     setLoading(true);
-    login(form.email.trim(), form.password)
+    login(email, form.password)
       .then(() => {
         const target = location.state?.from?.pathname || '/';
         nav(target, { replace: true });

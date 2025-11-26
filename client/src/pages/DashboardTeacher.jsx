@@ -652,11 +652,27 @@ export default function DashboardTeacher() {
           <div>
             <label>Rating</label>
             <div style={{ display:'flex', gap:'.35rem' }}>
-              {[1,2,3,4,5].map(n=> (
-                <button key={n} type="button" className={"btn-outline btn-xs"} onClick={()=>setReviewForm(f=>({...f,rating:n}))} style={{ borderColor: reviewForm.rating>=n? 'var(--color-primary)' : undefined }}>
-                  {n <= reviewForm.rating ? '★' : '☆'}
-                </button>
-              ))}
+              {[1,2,3,4,5].map(n => {
+                const active = reviewForm.rating >= n;
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    className="btn-outline btn-xs"
+                    onClick={() => setReviewForm(f => ({ ...f, rating: n }))}
+                    style={{
+                      borderColor: active ? '#f5b301' : undefined,
+                      borderWidth: active ? 4 : 1,
+                      color: active ? '#f5b301' : '#d0d0d0',
+                      fontSize: '1.1rem',
+                      lineHeight: 1,
+                      padding: '.15rem .35rem',
+                    }}
+                  >
+                    {n <= reviewForm.rating ? '★' : '☆'}
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div>
