@@ -47,7 +47,11 @@ export default function FloatingFeedback(){
     <div className="feedback-root" aria-live="polite">
       <button aria-label={open ? 'Hide feedback form' : 'Open feedback form'} onClick={toggle} className="feedback-toggle">
         <span className="icon" aria-hidden>
-          <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          {open ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          )}
         </span>
       </button>
       {open && (
@@ -57,9 +61,6 @@ export default function FloatingFeedback(){
               <h4 className="fb-title">Have a question? Drop in your message <span className="fb-emoji" role="img" aria-label="point down">👇</span></h4>
               <p className="fb-sub">It won't take more than 10 seconds. Shoot your shot. <span role="img" aria-label="smile">😁</span></p>
             </div>
-            <button type="button" className="fb-close" aria-label="Close feedback form" onClick={()=>setOpen(false)}>
-              <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-            </button>
           </div>
           <form onSubmit={submit} className="fb-form">
             <label className="fb-label">Email Address
