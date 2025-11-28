@@ -124,7 +124,7 @@ export default function HelpCenter() {
           <div className="card card-muted" style={{ marginTop:'.9rem' }}>
             <div style={{ fontSize:'.75rem', fontWeight:700, letterSpacing:'.6px', marginBottom:'.4rem' }}>Need more help?</div>
             <p className="muted" style={{ margin:'0 0 .6rem' }}>Reach our team for assistance.</p>
-            <a className="btn btn-sm" href="mailto:hello@example.com">Email Support</a>
+            <a className="btn btn-sm" href="mailto:shettyrithika12@gmail.com">Email Support</a>
           </div>
         </aside>
 
@@ -196,7 +196,7 @@ export default function HelpCenter() {
             <h3 style={{ margin:'0 0 .35rem' }}>Contact & Support</h3>
             <p className="muted" style={{ marginTop:0 }}>Didn’t find what you need? We’re happy to assist.</p>
             <div style={{ display:'flex', gap:'.6rem', flexWrap:'wrap', alignItems:'center' }}>
-              <a className="btn" href="mailto:hello@example.com">Email Support</a>
+              <a className="btn" href="mailto:shettyrithika12@gmail.com">Email Support</a>
               <Link className="btn btn-outline" to="/about">About the Platform</Link>
             </div>
           </section>
