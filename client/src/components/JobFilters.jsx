@@ -4,7 +4,7 @@ const orgTypes = ['', 'government','public_university','deemed','private','inter
 const empTypes = ['', 'full_time','part_time','contract','temporary','guest','visiting'];
 
 export default function JobFilters({ value, onChange }) {
-  const blank = { q:'', subject:'', grade:'', location:'', city:'', organization_type:'', employment_type:'', min_experience:'', mode:'', active:false };
+  const blank = { q:'', subject:'', grade:'', location:'', city:'', organization_type:'', employment_type:'', min_experience:'', mode:'' };
   const [form, setForm] = useState(value || blank);
   useEffect(()=>{ setForm(prev => ({ ...prev, ...value })); }, [value]);
   function update(e){ const f={...form,[e.target.name]: e.target.type==='checkbox' ? e.target.checked : e.target.value}; setForm(f); }
@@ -90,11 +90,6 @@ export default function JobFilters({ value, onChange }) {
               <option value="school">School</option>
               <option value="college">College/University</option>
             </select>
-          </div>
-          <div style={{ display:'flex', alignItems:'flex-end' }}>
-            <label style={{ display:'flex', gap:'.45rem', alignItems:'center', marginBottom:0 }}>
-              <input type="checkbox" name="active" checked={form.active} onChange={update} style={{ width:'auto' }} /> Active
-            </label>
           </div>
         </div>
       </div>
