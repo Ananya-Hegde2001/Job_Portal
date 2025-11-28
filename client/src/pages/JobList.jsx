@@ -29,7 +29,6 @@ export default function JobList() {
     if (f.employment_type) params.append('employment_type', f.employment_type);
     if (f.min_experience) params.append('min_experience', f.min_experience);
     if (f.mode !== '' && f.mode !== undefined) params.append('mode', f.mode);
-    if (f.active) params.append('active', '1');
     return params;
   }
   function load(f = {}) {
@@ -62,8 +61,15 @@ export default function JobList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   function onFilter(f){ setFilters(f); const params = buildParams(f); navigate('/jobs'+(params.toString()?`?${params}`:''), { replace:true }); load(f); }
-
-  function runQuickSearch(e){ e.preventDefault(); const next = { ...filters, q: quickQ, city: quickCity }; setFilters(next); onFilter(next); }
+  // Update results in real-time as user types in the quick search bar
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const next = { ...filters, q: quickQ, city: quickCity };
+      setFilters(next);
+      onFilter(next);
+    }, 300); // small debounce
+    return () => clearTimeout(handler);
+  }, [quickQ, quickCity]);
 
   async function createAlert(){
     try{
@@ -77,7 +83,7 @@ export default function JobList() {
   }
 
   const activeChips = useMemo(()=>{
-    const map = { subject:'Subject', grade:'Grade', city:'City', location:'Region', organization_type:'Org', employment_type:'Type', min_experience:'MaxExp', mode:'Mode', active:'Active' };
+    const map = { subject:'Subject', grade:'Grade', city:'City', location:'Region', organization_type:'Org', employment_type:'Type', min_experience:'MaxExp', mode:'Mode' };
     const prettyMode = { remote:'Remote', onsite:'On-site', tuition:'Tuition', school:'School', college:'College/University' };
     return Object.entries(filters)
       .filter(([k,v])=> v && v!=='' && v!==false)
@@ -89,11 +95,11 @@ export default function JobList() {
       <div className="jobs-sidebar"><JobFilters value={filters} onChange={onFilter} /></div>
       <div className="jobs-main">
         <div className="jobs-header card">
-          <form onSubmit={runQuickSearch} className="jobs-search-bar">
+          <form onSubmit={e=>e.preventDefault()} className="jobs-search-bar">
             <input value={quickQ} onChange={e=>setQuickQ(e.target.value)} placeholder='Search jobs...' />
             <div className="jobs-search-divider" />
             <input value={quickCity} onChange={e=>setQuickCity(e.target.value)} placeholder='City or remote' />
-            <button className='btn btn-sm'>Search</button>
+            <button className='btn btn-sm' type="button">Search</button>
           </form>
           <div style={{display:'flex',justifyContent:'flex-end'}}>
             <button className="btn btn-sm" type="button" onClick={()=>setAlertOpen(true)}>Create alert from this search</button>

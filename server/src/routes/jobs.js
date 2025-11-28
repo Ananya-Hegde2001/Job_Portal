@@ -42,13 +42,17 @@ router.get('/', maybeAuth, (req, res) => {
   let sql = `SELECT j.*, u.name as employer_name FROM jobs j JOIN users u ON u.id = j.employer_id WHERE 1=1`;
   const params = [];
   const isMine = mine === '1' && req.user && req.user.role === 'employer';
-  if (q) { sql += ' AND (j.title LIKE ? OR j.description LIKE ? OR j.institution_name LIKE ?)'; params.push(`%${q}%`, `%${q}%`, `%${q}%`); }
-  if (subject) { sql += ' AND j.subject = ?'; params.push(subject); }
-  if (grade) { sql += ' AND j.grade_level = ?'; params.push(grade); }
-  if (location) { sql += ' AND j.location = ?'; params.push(location); }
-  if (city) { sql += ' AND j.city = ?'; params.push(city); }
-  if (organization_type) { sql += ' AND j.organization_type = ?'; params.push(organization_type); }
-  if (employment_type) { sql += ' AND j.employment_type = ?'; params.push(employment_type); }
+  if (q) {
+    const qLike = `%${String(q).toLowerCase()}%`;
+    sql += ' AND (LOWER(j.title) LIKE ? OR LOWER(j.description) LIKE ? OR LOWER(j.institution_name) LIKE ?)';
+    params.push(qLike, qLike, qLike);
+  }
+  if (subject) { sql += ' AND LOWER(j.subject) = ?'; params.push(String(subject).toLowerCase()); }
+  if (grade) { sql += ' AND LOWER(j.grade_level) = ?'; params.push(String(grade).toLowerCase()); }
+  if (location) { sql += ' AND LOWER(j.location) = ?'; params.push(String(location).toLowerCase()); }
+  if (city) { sql += ' AND LOWER(j.city) = ?'; params.push(String(city).toLowerCase()); }
+  if (organization_type) { sql += ' AND LOWER(j.organization_type) = ?'; params.push(String(organization_type).toLowerCase()); }
+  if (employment_type) { sql += ' AND LOWER(j.employment_type) = ?'; params.push(String(employment_type).toLowerCase()); }
   if (min_experience) { sql += ' AND (j.min_experience IS NULL OR j.min_experience <= ?)'; params.push(Number(min_experience)); }
   // High-level mode mapping (remote/onsite/school/college/tuition)
   if (mode) {
